@@ -83,7 +83,7 @@ private:
             Tag_External_Clock_Time_Base >= p_tag)
         {
             // ...and external clock used has not been set...
-            if (m_headers.find(Tag_External_Clock_Used) != m_headers.end() ||
+            if (m_headers.find(Tag_External_Clock_Used) == m_headers.end() ||
                 // ...or it has been set to false
                 !m_headers[Tag_External_Clock_Used].second.front())
             {
@@ -97,7 +97,7 @@ private:
             // If this is the external clock resampler mask...
             if (Tag_External_Clock_Resampler_Mask == p_tag &&
                 // ...and the resampler used has not been set...
-                (m_headers.find(Tag_External_Clock_Resampler_Enabled) !=
+                (m_headers.find(Tag_External_Clock_Resampler_Enabled) ==
                      m_headers.end() ||
                  // ...or it has been set to false
                  !m_headers[Tag_External_Clock_Resampler_Enabled]

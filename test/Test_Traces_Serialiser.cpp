@@ -33,8 +33,8 @@
 #include "Tests.cpp"
 #include "Traces_Serialiser.hpp" // for Serialiser
 
-TEST_CASE("Adding headers"
-          "[!throws][headers]")
+TEST_CASE("Adding traces"
+          "[!throws][traces]")
 {
     SECTION("Constuctor works")
     {
@@ -44,78 +44,116 @@ TEST_CASE("Adding headers"
 
     SECTION("2 bytes trace size")
     {
-        std::vector<uint8_t> traces = {0,  1,  2,  3,  4,  5,  6,  7,
-                                       8,  9,  10, 11, 12, 13, 14, 15,
-                                       16, 17, 18, 19, 20, 21, 22, 23};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(2400, 1, 0x02, traces);
-
-        serialiser.Save("traces.trs");
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser(
+            2400, 1, 0x02, {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+                            12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}));
     }
+}
+
+TEST_CASE("Adding headers"
+          "[!throws][headers]")
+{
+    std::vector<uint8_t> traces = {0, 1, 2, 3, 4, 5};
+    Traces_Serialiser::Serialiser serialiser =
+        Traces_Serialiser::Serialiser(4, 1, 0x02, traces);
 
     SECTION("Set Cryptographic Data Length")
     {
-        std::vector<uint8_t> traces = {0, 1, 2, 3, 4, 5};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(4, 1, 0x02, traces);
-
         REQUIRE_NOTHROW(serialiser.Set_Cryptographic_Data_Length(2));
-
-        serialiser.Save("traces.trs");
     }
 
     SECTION("Set Trace Title")
     {
-        std::vector<uint8_t> traces = {5};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(1, 1, 0x01, traces);
-
         REQUIRE_NOTHROW(serialiser.Set_Trace_Title("ABCD vwxyz."));
-
-        serialiser.Save("traces.trs");
-    }
-
-    SECTION("Set External clock used - implicit true")
-    {
-        std::vector<uint8_t> traces = {5, 9};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(2, 4, 0x05, traces);
-
-        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used());
-
-        serialiser.Save("traces.trs");
-    }
-
-    SECTION("Set External clock used - explicit true")
-    {
-        std::vector<uint8_t> traces = {5, 9};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(2, 4, 0x05, traces);
-
-        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
-
-        serialiser.Save("traces.trs");
-    }
-
-    SECTION("Set External clock used - explicit false")
-    {
-        std::vector<uint8_t> traces = {5, 9};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(2, 4, 0x05, traces);
-
-        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(false));
-
-        serialiser.Save("traces.trs");
     }
 
     SECTION("Set Axis Scale X")
     {
-        std::vector<uint8_t> traces = {5, 9};
-        Traces_Serialiser::Serialiser serialiser =
-            Traces_Serialiser::Serialiser(2, 4, 0x05, traces);
-
         REQUIRE_NOTHROW(serialiser.Set_Axis_Scale_X(0.1f));
+    }
 
-        serialiser.Save("traces.trs");
+    SECTION("Set External clock used - implicit true")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used());
+    }
+
+    SECTION("Set External clock used - explicit true")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+    }
+
+    SECTION("Set External clock used - explicit false")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(false));
+    }
+
+    SECTION("Set External clock threashold after setting external clock used "
+            "to true")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Threshold(9.0f));
+    }
+
+    SECTION("Set External clock threashold after setting external clock used "
+            "to false")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(false));
+
+        REQUIRE_THROWS_WITH(
+            serialiser.Set_External_Clock_Threshold(90.080f),
+            Catch::Matchers::Contains("Enable external clock explicitly with "
+                                      "Set_External_Clock_Used()"));
+    }
+
+    SECTION("Set External clock threashold without setting external clock used")
+    {
+        REQUIRE_THROWS_WITH(
+            serialiser.Set_External_Clock_Threshold(9.81f),
+            Catch::Matchers::Contains("Enable external clock explicitly with "
+                                      "Set_External_Clock_Used()"));
+    }
+
+    SECTION("Set External clock resampler enabled without setting external "
+            "clock used")
+    {
+        REQUIRE_THROWS_WITH(
+            serialiser.Set_External_Clock_Resampler_Enabled(true),
+            Catch::Matchers::Contains("Enable external clock explicitly with "
+                                      "Set_External_Clock_Used()"));
+    }
+
+    SECTION("Set External clock resampler mask after setting external clock "
+            "resampler enabled to true")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Resampler_Enabled());
+
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Resampler_Mask(1));
+    }
+
+    SECTION("Set External clock resampler mask after setting external clock "
+            "resampler enabled to false")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Resampler_Enabled(false));
+
+        REQUIRE_THROWS_WITH(
+            serialiser.Set_External_Clock_Resampler_Mask(10),
+            Catch::Matchers::Contains(
+                "Enable external clock resampler explicitly with "
+                "Set_External_Clock_Resampler_Enabled()"));
+    }
+
+    SECTION("Set External clock resampler mask without setting external clock "
+            "resampler enabled")
+    {
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+
+        REQUIRE_THROWS_WITH(
+            serialiser.Set_External_Clock_Resampler_Mask(0),
+            Catch::Matchers::Contains(
+                "Enable external clock resampler explicitly with "
+                "Set_External_Clock_Resampler_Enabled()"));
     }
 }
