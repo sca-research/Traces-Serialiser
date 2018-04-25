@@ -62,6 +62,13 @@ private:
                 std::remove_if(bytes_vector.begin(), bytes_vector.end(),
                                [](uint8_t byte) { return byte == 0; }),
                 bytes_vector.end());
+
+            // If bytes_vector.size() is 0 then removing trailing 0s has removed
+            // the value 0, so read it.
+            if (0 == bytes_vector.size())
+            {
+                bytes_vector.push_back(0);
+            }
         }
         return bytes_vector;
     }
@@ -170,12 +177,6 @@ public:
 
         // A temporary variable to convert p_data to bytes.
         const std::vector<uint8_t> value = convert_to_bytes(p_data);
-
-        // Don't save empty values
-        if (0 == value.size())
-        {
-            return;
-        }
 
         // Add it to the map of headers.
         m_headers[p_tag] = std::make_pair(value.size(), value);
