@@ -19,8 +19,10 @@
 #define TRACES_SERIALISER_HPP
 
 #include <cstdint>       // for uint8_t
+#include <fstream>       // for ofstream
 #include <iomanip>       // for setw, setfill
 #include <iostream>      // for cout
+#include <sstream>       // for ostringstream
 #include <string>        // for string
 #include <unordered_map> // for map
 #include <utility>       // for pair
@@ -97,6 +99,14 @@ private:
         }
     }
 
+    std::string hex(uint8_t p_value) const
+    {
+        std::ostringstream string_stream(std::ostringstream::out);
+        string_stream << std::setw(2) << std::setfill('0') << std::hex
+                      << +p_value;
+        return string_stream.str();
+    }
+
 public:
     // Public so user can write code like this: Add_Header(Number_Of_Traces, 4);
     const uint8_t Tag_Number_Of_Traces             = 0x41;
@@ -169,30 +179,29 @@ public:
         m_headers[p_tag] = std::make_pair(value.size(), value);
     }
 
-    void Save(std::string p_file_path)
+    void Save(std::string p_file_path) const
     {
-        // TODO: Add 0x5F - header end in front of Traces
-        std::cout << "Headers : " << std::endl;
-        for (const auto& elem : m_headers)
+        std::ofstream output_file(p_file_path,
+                                  std::ios::out | std::ios::binary);
+
+        if (!output_file)
         {
-            std::cout << std::hex << std::setw(2) << std::setfill('0')
-                      << +elem.first << " : " << std::hex << std::setw(2)
-                      << std::setfill('0') << +elem.second.first << " : ";
-            for (const auto& i : elem.second.second)
+            throw("An error occurred when preparing the file to be written to");
+        }
+
+        for (const auto& header : m_headers)
+        {
+            output_file << hex(header.first) << hex(header.second.first);
+            for (const auto& value : header.second.second)
             {
-                std::cout << std::setw(2) << std::setfill('0') << std::hex << +i
-                          << ' ';
+                output_file << hex(value);
             }
-            std::cout << "End Header" << std::endl;
         }
-        std::cout << "Traces: ";
-        std::cout << std::hex << Tag_Trace_Block_Marker << std::endl;
-        for (const auto& i : m_traces)
+        output_file << hex(Tag_Trace_Block_Marker);
+        for (const auto& trace : m_traces)
         {
-            std::cout << std::setw(2) << std::setfill('0') << std::hex << +i
-                      << ' ';
+            output_file << hex(trace);
         }
-        std::cout << " End Traces" << std::endl << std::endl;
     }
 
     // TODO: Rename
