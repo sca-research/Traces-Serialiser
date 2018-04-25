@@ -36,34 +36,37 @@ private:
     std::unordered_map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>>
         m_headers;
 
-    std::vector<uint8_t> m_traces;
+    const std::vector<uint8_t> m_traces;
 
     template <typename T>
-    void convert_to_bytes(const T& p_data, std::vector<uint8_t>& out_bytes)
+    const std::vector<uint8_t> convert_to_bytes(const T& p_data) const
     {
+        std::vector<uint8_t> bytes_vector;
+
         // Strings need to be handled seperately
         if constexpr (std::is_same<T, std::string>::value)
         {
-            out_bytes = {p_data.begin(), p_data.end()};
+            bytes_vector = {p_data.begin(), p_data.end()};
         }
         else
         {
             // Cast to a byte aray
-            const unsigned char* bytes =
+            const unsigned char* bytes_array =
                 reinterpret_cast<const unsigned char*>(&p_data);
 
             // Convert byte array to byte vector
-            out_bytes = {bytes, bytes + sizeof(T)};
+            bytes_vector = {bytes_array, bytes_array + sizeof(T)};
 
             // Needed to remove trailing 0s
-            out_bytes.erase(
-                std::remove_if(out_bytes.begin(), out_bytes.end(),
+            bytes_vector.erase(
+                std::remove_if(bytes_vector.begin(), bytes_vector.end(),
                                [](uint8_t byte) { return byte == 0; }),
-                out_bytes.end());
+                bytes_vector.end());
         }
+        return bytes_vector;
     }
 
-    void validate(const size_t& p_tag)
+    void validate(const uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the external
         // clock has been explicitly enabled.
@@ -99,7 +102,7 @@ private:
         }
     }
 
-    std::string hex(uint8_t p_value) const
+    const std::string hex(const uint8_t p_value) const
     {
         std::ostringstream string_stream(std::ostringstream::out);
         string_stream << std::setw(2) << std::setfill('0') << std::hex
@@ -108,7 +111,8 @@ private:
     }
 
 public:
-    // Public so user can write code like this: Add_Header(Number_Of_Traces, 4);
+    // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
+    // 4);
     const uint8_t Tag_Number_Of_Traces             = 0x41;
     const uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
     const uint8_t Tag_Sample_Coding                = 0x43;
@@ -148,7 +152,7 @@ public:
                const uint8_t p_sample_coding, /* TODO: Maybe change sample
                                                  coding to something easy to
                                                  understand? */
-               const std::vector<uint8_t> p_traces)
+               const std::vector<uint8_t>& p_traces)
         : m_headers(), m_traces(p_traces)
     {
         Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
@@ -157,7 +161,7 @@ public:
     }
 
     // Public to allow user to add new headers that may not have functions
-    template <typename T> void Add_Header(const size_t& p_tag, const T& p_data)
+    template <typename T> void Add_Header(const uint8_t& p_tag, const T& p_data)
     {
         // TODO: Handle case where bit 8 (msb) is set to '0' in object length.
         // See inspector manual for details.
@@ -165,9 +169,7 @@ public:
         validate(p_tag);
 
         // A temporary variable to convert p_data to bytes.
-        std::vector<uint8_t> value;
-
-        convert_to_bytes(p_data, value);
+        const std::vector<uint8_t> value = convert_to_bytes(p_data);
 
         // Don't save empty values
         if (0 == value.size())
@@ -179,7 +181,7 @@ public:
         m_headers[p_tag] = std::make_pair(value.size(), value);
     }
 
-    void Save(std::string p_file_path) const
+    void Save(const std::string& p_file_path) const
     {
         std::ofstream output_file(p_file_path,
                                   std::ios::out | std::ios::binary);
