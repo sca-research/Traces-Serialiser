@@ -15,8 +15,8 @@
  *  along with Traces-Serialiser.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRACES_SERIALISER_HPP
-#define TRACES_SERIALISER_HPP
+#ifndef SRC_TRACES_SERIALISER_HPP
+#define SRC_TRACES_SERIALISER_HPP
 
 #include <cstdint>       // for uint8_t
 #include <fstream>       // for ofstream
@@ -213,7 +213,10 @@ public:
         Add_Header(Tag_Length_Of_Cryptographic_Data, p_length);
     }
 
-    // TODO: Title_Space_Per_Trace
+    void Set_Title_Space_Per_Trace(const uint8_t p_length = 0)
+    {
+        Add_Header(Tag_Title_Space_Per_Trace, p_length);
+    }
 
     void Set_Trace_Title(const std::string& p_title = "trace")
     {
@@ -348,4 +351,4 @@ public:
     }
 };
 } // namespace Traces_Serialiser
-#endif
+#endif // SRC_TRACES_SERIALISER_HPP
