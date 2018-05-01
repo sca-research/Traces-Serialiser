@@ -56,9 +56,8 @@ set(THIRD_PARTY_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party)
 # if coverage is enabled.
 add_subdirectory(test)
 
-# TODO: Add Doxygen
 # Recurse into the "doc" subdirectory.
-# add_subdirectory(doc)
+add_subdirectory(doc)
 
 # Recurse into the "src" subdirectory.
 add_subdirectory(src)

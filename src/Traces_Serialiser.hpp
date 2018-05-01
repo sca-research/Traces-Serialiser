@@ -15,6 +15,15 @@
  *  along with Traces-Serialiser.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*!
+ *  @file Traces_Serialiser.hpp
+ *  @brief This file contains the logic behind Traces_Serialiser. This is the
+ *  only file needed to use this tool.
+ *  @author Scott Egerton
+ *  @date 2018
+ *  @copyright GNU Affero General Public License Version 3+
+ */
+
 #ifndef SRC_TRACES_SERIALISER_HPP
 #define SRC_TRACES_SERIALISER_HPP
 
@@ -30,27 +39,49 @@
 
 namespace Traces_Serialiser
 {
+//! @class Serialiser
+//! @brief This is the main class that is used in order to serialise traces.
+//! Currently it supports saving in the format used by Riscure's inspector tool.
+//! @see https://www.riscure.com/security-tools/inspector-sca/
+//! TODO: edit brief
 class Serialiser
 {
 private:
+    //! This is the main container that stores the trace header information,
+    //! ready to be saved into the output file. The format uses a
+    //! type-length-value encoding to store this information.
+    //! @see https://en.wikipedia.org/wiki/Type-length-value
+    //! In this data structure, the headers are indexed by their type in a map.
+    //! The map then contains a pair, which corresponds to the length and the
+    //! value.
+    //! The tag and length are stored as a byte (uint8_t). The value is stored
+    //! as one or more bytes (std::vector<uint8_t>).
     std::unordered_map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>>
         m_headers;
 
+    //! This contains the actual side channel analysis traces, stored as bytes
+    //! ready to be saved into the output file.
     const std::vector<uint8_t> m_traces;
 
+    //! @brief Converts the data given by the parameter p_data into a series of
+    //! bytes.
+    //! @param p_data The data to be converted to bytes. This uses templates so
+    //! that this function can convert any basic data type to bytes.
+    //! @returns A series of bytes represented using std::vector<uint8_t>.
     template <typename T>
     const std::vector<uint8_t> convert_to_bytes(const T& p_data) const
     {
+        // A temporary store for the converted bytes.
         std::vector<uint8_t> bytes_vector;
 
-        // Strings need to be handled seperately
+        // Strings need to be handled separately.
         if constexpr (std::is_same<T, std::string>::value)
         {
             bytes_vector = {p_data.begin(), p_data.end()};
         }
         else
         {
-            // Cast to a byte aray
+            // Cast to a byte array
             const unsigned char* bytes_array =
                 reinterpret_cast<const unsigned char*>(&p_data);
 
@@ -64,7 +95,7 @@ private:
                 bytes_vector.end());
 
             // If bytes_vector.size() is 0 then removing trailing 0s has removed
-            // the value 0, so read it.
+            // the original value, 0; therefore re add it.
             if (0 == bytes_vector.size())
             {
                 bytes_vector.push_back(0);
@@ -73,6 +104,12 @@ private:
         return bytes_vector;
     }
 
+    //! @brief Ensures that setting the header given by the parameter p_tag is
+    //! allowed in the current context, based on which headers have already been
+    //! set.
+    //! @param p_tag The tag indicating which header is currently being set.
+    //! @returns This does not return anything as san exception will be thrown
+    //! if the validation fails.
     void validate(const uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the external
@@ -109,6 +146,17 @@ private:
         }
     }
 
+    //! @brief This is a utility function used to simplify the syntax of the
+    //! Save() function. This will convert a byte, stored as an uint8_t to a two
+    //! character hex string. This is don't as the Riscure trace format expects
+    //! bytes as two character hex. For example:
+    //! @code
+    //! 4 -> 04
+    //! 11 -> 0B
+    //! 20 -> 14
+    //! @endcode
+    //! @param p_value The value to be reformated.
+    //! @returns The value represented as a string.
     const std::string hex(const uint8_t p_value) const
     {
         std::ostringstream string_stream(std::ostringstream::out);
@@ -118,6 +166,7 @@ private:
     }
 
 public:
+    // These varibales are intended to improve readability and nothing more.
     // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
     // 4);
     const uint8_t Tag_Number_Of_Traces             = 0x41;
@@ -154,6 +203,20 @@ public:
     const uint8_t Tag_External_Clock_Frequency         = 0x66;
     const uint8_t Tag_External_Clock_Time_Base         = 0x67;
 
+    //! @brief The main entry point. The constructor requires all mandatory
+    //! headers to be set as parameters. Optional headers can be set later.
+    //! All traces are currently required to be passed to the constructor as
+    //! well.
+    //! @param p_number_of_traces The number of traces to be saved.
+    //! @param p_samples_per_trace The number of samples in each individual
+    //! trace.
+    //! @param p_sample_coding The sample coding.
+    //! Bits 8-6 are reserved and must be '000'.
+    //! Bit 5 corresponds to integer (0) or floating point (1).
+    //! Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
+    //! TODO: Nothing is currently done with this value.
+    //! @param p_traces All of the traces as stored in bytes. TODO: in future
+    //! possibly allow different formats for this?
     Serialiser(const uint32_t p_number_of_traces,
                const uint32_t p_samples_per_trace,
                const uint8_t p_sample_coding, /* TODO: Maybe change sample
@@ -167,7 +230,14 @@ public:
         Add_Header(Tag_Sample_Coding, p_sample_coding);
     }
 
-    // Public to allow user to add new headers that may not have functions
+    //! @brief This is this function that adds headers to the list of headers to
+    //! be saved. This is called by all other functions that add headers as it
+    //! is the only place headers are added.
+    //! @param p_tag The tag representing which header is currently being set.
+    //! @param p_data The data that should be assigned to the header given by
+    //! p_tag.
+    //! @note This is public to allow user to add new headers that may not have
+    //! functions
     template <typename T> void Add_Header(const uint8_t& p_tag, const T& p_data)
     {
         // TODO: Handle case where bit 8 (msb) is set to '0' in object length.
@@ -182,6 +252,14 @@ public:
         m_headers[p_tag] = std::make_pair(value.size(), value);
     }
 
+    //! @brief This saves the current state of the headers, along with the
+    //! traces to a file specified by p_file_path.
+    //! @param p_file_path The path of the file to save to.
+    //! @note If the path contains a directory that doesn't exist, it will not
+    //! be created, instead an error file be thrown. New files will be created
+    //! however.
+    //! @exception Throws an exception if creating the output stream fails for
+    //! any reason. For example, directory doesn't exist.
     void Save(const std::string& p_file_path) const
     {
         std::ofstream output_file(p_file_path,
@@ -192,6 +270,7 @@ public:
             throw("An error occurred when preparing the file to be written to");
         }
 
+        // Output each header
         for (const auto& header : m_headers)
         {
             output_file << hex(header.first) << hex(header.second.first);
@@ -200,6 +279,9 @@ public:
                 output_file << hex(value);
             }
         }
+
+        // Output the traces
+        // The start of traces is marked by a tag.
         output_file << hex(Tag_Trace_Block_Marker);
         for (const auto& trace : m_traces)
         {
