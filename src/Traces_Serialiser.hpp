@@ -43,7 +43,6 @@ namespace Traces_Serialiser
 //! @brief This is the main class that is used in order to serialise traces.
 //! Currently it supports saving in the format used by Riscure's inspector tool.
 //! @see https://www.riscure.com/security-tools/inspector-sca/
-//! TODO: edit brief
 class Serialiser
 {
 private:
@@ -66,7 +65,8 @@ private:
     //! @brief Converts the data given by the parameter p_data into a series of
     //! bytes.
     //! @param p_data The data to be converted to bytes. This uses templates so
-    //! that this function can convert any basic data type to bytes.
+    //! that this function can convert any basic data type and std::string to
+    //! bytes.
     //! @returns A series of bytes represented using std::vector<uint8_t>.
     template <typename T>
     const std::vector<uint8_t> convert_to_bytes(const T& p_data) const
@@ -91,7 +91,7 @@ private:
             // Needed to remove trailing 0s
             bytes_vector.erase(
                 std::remove_if(bytes_vector.begin(), bytes_vector.end(),
-                               [](uint8_t byte) { return byte == 0; }),
+                               [](const uint8_t byte) { return 0 == byte; }),
                 bytes_vector.end());
 
             // If bytes_vector.size() is 0 then removing trailing 0s has removed
@@ -214,9 +214,9 @@ public:
     //! Bits 8-6 are reserved and must be '000'.
     //! Bit 5 corresponds to integer (0) or floating point (1).
     //! Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
-    //! TODO: Nothing is currently done with this value.
-    //! @param p_traces All of the traces as stored in bytes. TODO: in future
-    //! possibly allow different formats for this?
+    //! @todo Nothing is currently done with this value.
+    //! @param p_traces All of the traces as stored in bytes. @todo in future
+    //! possibly allow different formats for p_traces?
     Serialiser(const uint32_t p_number_of_traces,
                const uint32_t p_samples_per_trace,
                const uint8_t p_sample_coding, /* TODO: Maybe change sample
@@ -310,9 +310,9 @@ public:
         Add_Header(Tag_Description, p_description);
     }
 
-    void Set_Axis_Offset_X(const std::string& p_label)
+    void Set_Axis_Offset_X(const uint32_t p_offset = 0)
     {
-        Add_Header(Tag_Axis_Offset_X, p_label);
+        Add_Header(Tag_Axis_Offset_X, p_offset);
     }
 
     void Set_Axis_Label_X(const std::string& p_label)
