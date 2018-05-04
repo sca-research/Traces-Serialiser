@@ -15,7 +15,8 @@
     along with Traces-Serialiser.  If not, see <http://www.gnu.org/licenses/>.
 #]=]
 
-# TODO: Look into replacing this with DoxygenTargets from https://github.com/rpavlik/cmake-modules
+# TODO: Look into replacing this with DoxygenTargets from
+# https://github.com/rpavlik/cmake-modules
 # Maybe auto download?
 
 find_package(Doxygen)

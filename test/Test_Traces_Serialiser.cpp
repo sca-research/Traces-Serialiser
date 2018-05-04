@@ -25,9 +25,6 @@
 
 #define CATCH_CONFIG_MAIN
 
-#include <cstdint> // for uint8_t
-#include <vector>  // for vector
-
 #include <catch.hpp> // for Section, StringRef, SECTION, Sectio...
 
 #include "Tests.cpp"

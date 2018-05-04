@@ -27,13 +27,13 @@
 #ifndef SRC_TRACES_SERIALISER_HPP
 #define SRC_TRACES_SERIALISER_HPP
 
+#include <algorithm>     // for remove_if
 #include <cstdint>       // for uint8_t
 #include <fstream>       // for ofstream
 #include <iomanip>       // for setw, setfill
-#include <iostream>      // for cout
 #include <sstream>       // for ostringstream
 #include <string>        // for string
-#include <unordered_map> // for map
+#include <unordered_map> // for unordered_map
 #include <utility>       // for pair
 #include <vector>        // for vector
 
@@ -166,7 +166,7 @@ private:
     }
 
 public:
-    // These varibales are intended to improve readability and nothing more.
+    // These variables are intended to improve readability and nothing more.
     // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
     // 4);
     const uint8_t Tag_Number_Of_Traces             = 0x41;

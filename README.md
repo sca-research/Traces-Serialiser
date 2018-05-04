@@ -15,18 +15,12 @@ than the standard library.
   * [Getting started for development](#getting-started-for-development)
     + [Prerequisites](#prerequisites)
       - [Linux](#linux)
-        * [APT (Ubuntu/Linux Mint/Debian)](#apt--ubuntu-linux-mint-debian)
-        * [YUM (Fedora/CentOS/RHEL)](#yum--fedora-centos-rhel)
-        * [Pacman (Arch)](#pacman--arch)
       - [MacOS](#macos)
       - [Windows/Linux](#windows-linux)
     + [Building](#building)
     + [Running tests](#running-tests)
       - [Coverage information](#coverage-information)
   * [Configuration Options](#configuration-options)
-    + [Traces-Serialiser_BUILD_DOCUMENTATION](#traces-serialiser-build-documentation)
-    + [Traces-Serialiser_UPDATE_EXTERNAL_HEADERS](#traces-serialiser-update-external-headers)
-    + [Traces-Serialiser_CALCULATE_COVERAGE](#traces-serialiser-calculate-coverage)
   * [Built with](#built-with)
   * [License](#license)
 
@@ -36,10 +30,12 @@ than the standard library.
 1) The only file that needs to be included in your program is
 `Traces_Serialiser.hpp` located in the directory `src`.
 
-2) To make use of it, add these lines to your program
+2) To make use of it, add this line to your program
 ```cpp
 #include "Traces_Serialiser.hpp"
 ```
+
+This requires **C++17** or later.
 
 ### Example Usage
 
@@ -52,7 +48,8 @@ serialiser.Save("/file/path/to/save/to");
 ```
 
 Adding additional headers is simple as all headers have a custom function
-(at the time of writing). Here is an example of a few of them.
+(at the time of writing). Here is an example of a few of them. A full list is
+available in the [API Documentation.](#api-documentation)
 
 ```cpp
 Traces_Serialiser::Serialiser serialiser(number_of_traces, samples_per_trace,
@@ -144,7 +141,7 @@ brew install cmake
 Alternatively, follow the
 [official CMake install instructions.](https://cmake.org/install/)
 
-#### Windows/Linux
+#### Windows
 
 Follow the [official CMake install instructions.](https://cmake.org/install/)
 
@@ -157,7 +154,8 @@ for building tests and documentation.
 
 2) **From the build directory run this command.** This will generate native
 build files for your platform. A specific generator can be specified using the
-"-G *generator*" flag. A [list of generators is available here.](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+"-G *generator*" flag. A [list of generators is available here.]
+(https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 ```
 cmake /path/to/source/directory/
 ```
