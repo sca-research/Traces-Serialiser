@@ -25,10 +25,10 @@
 
 #define CATCH_CONFIG_MAIN
 
-#include <catch.hpp> // for Section, StringRef, SECTION, Sectio...
+#include <catch.hpp>  // for Section, StringRef, SECTION, Sectio...
 
 #include "Tests.cpp"
-#include "Traces_Serialiser.hpp" // for Serialiser
+#include "Traces_Serialiser.hpp"  // for Serialiser
 
 TEST_CASE("Adding traces"
           "[!throws][traces]")

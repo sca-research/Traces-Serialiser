@@ -27,15 +27,16 @@
 #ifndef SRC_TRACES_SERIALISER_HPP
 #define SRC_TRACES_SERIALISER_HPP
 
-#include <algorithm>     // for remove_if
-#include <cstdint>       // for uint8_t
-#include <fstream>       // for ofstream
-#include <iomanip>       // for setw, setfill
-#include <sstream>       // for ostringstream
-#include <string>        // for string
-#include <unordered_map> // for unordered_map
-#include <utility>       // for pair
-#include <vector>        // for vector
+#include <algorithm>      // for remove_if
+#include <cstdint>        // for uint8_t
+#include <fstream>        // for ofstream
+#include <iomanip>        // for setw, setfill
+#include <ios>            // for failure
+#include <sstream>        // for ostringstream
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for move, pair
+#include <vector>         // for vector
 
 namespace Traces_Serialiser
 {
@@ -90,11 +91,12 @@ private:
 
             // Needed to remove trailing 0s
             bytes_vector.erase(
-                std::remove_if(bytes_vector.begin(), bytes_vector.end(),
+                std::remove_if(bytes_vector.begin(),
+                               bytes_vector.end(),
                                [](const uint8_t byte) { return 0 == byte; }),
                 bytes_vector.end());
 
-            // If bytes_vector.size() is 0 then removing trailing 0s has removed
+            // If bytes_vector is empty then removing trailing 0s has removed
             // the original value, 0; therefore re add it.
             if (bytes_vector.empty())
             {
@@ -432,5 +434,5 @@ public:
         Add_Header(Tag_External_Clock_Time_Base, p_time_base);
     }
 };
-} // namespace Traces_Serialiser
-#endif // SRC_TRACES_SERIALISER_HPP
+}  // namespace Traces_Serialiser
+#endif  // SRC_TRACES_SERIALISER_HPP

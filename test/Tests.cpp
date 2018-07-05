@@ -27,4 +27,4 @@
 //! @see https://github.com/catchorg/Catch2
 #define CATCH_CONFIG_MAIN
 
-#include <catch.hpp> // for catch
+#include <catch.hpp>  // for catch
