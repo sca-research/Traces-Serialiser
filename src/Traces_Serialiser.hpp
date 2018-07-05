@@ -96,7 +96,7 @@ private:
 
             // If bytes_vector.size() is 0 then removing trailing 0s has removed
             // the original value, 0; therefore re add it.
-            if (0 == bytes_vector.size())
+            if (bytes_vector.empty())
             {
                 bytes_vector.push_back(0);
             }
