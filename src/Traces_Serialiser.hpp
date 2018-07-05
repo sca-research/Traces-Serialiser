@@ -368,7 +368,7 @@ public:
     }
 
     // TODO: Should this be a string?
-    void Set_Scope_ID(const std::string& p_id = 0)
+    void Set_Scope_ID(const std::string& p_id)
     {
         Add_Header(Tag_Scope_ID, p_id);
     }
