@@ -40,9 +40,11 @@ This requires **C++17** or later.
 ### Example Usage
 
 This is the most basic way to use the library at the moment.
-```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces, samples_per_trace,
-                                  sample_coding, traces);
+```cp
+Traces_Serialiser::Serialiser serialiser(number_of_traces,
+                                         samples_per_trace,
+                                         sample_coding,
+                                         traces);p
 
 serialiser.Save("/file/path/to/save/to");
 ```
@@ -52,8 +54,10 @@ Adding additional headers is simple as all headers have a custom function
 available in the [API Documentation.](#api-documentation)
 
 ```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces, samples_per_trace,
-                                  sample_coding, traces);
+Traces_Serialiser::Serialiser serialiser(number_of_traces,
+                                         samples_per_trace,
+                                         sample_coding,
+                                         traces);
 
 serialiser.Set_Trace_Title("My traces");
 serialiser.Set_Axis_Scale_Y(0.5f);
@@ -65,10 +69,13 @@ serialiser.Save("/file/path/to/save/to");
 Custom headers can also be added through the `Add_Header` method, however this
 is not recommended as it is more error prone.
 ```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces, samples_per_trace,
-                                  sample_coding, traces);
+Traces_Serialiser::Serialiser serialiser(number_of_traces,
+                                         samples_per_trace,
+                                         sample_coding, traces);
 
-serialiser.Add_Header(serialiser.Tag_Trace_Title, "My traces");
+serialiser.Add_Header(Traces_Serialiser::Serialiser::Tag_Trace_Title,
+                      "My traces");
+
 serialiser.Add_Header(0x48, 7);
 
 serialiser.Save("/file/path/to/save/to");

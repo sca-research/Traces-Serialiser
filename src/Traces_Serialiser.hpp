@@ -171,39 +171,39 @@ public:
     // These variables are intended to improve readability and nothing more.
     // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
     // 4);
-    const uint8_t Tag_Number_Of_Traces             = 0x41;
-    const uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
-    const uint8_t Tag_Sample_Coding                = 0x43;
-    const uint8_t Tag_Length_Of_Cryptographic_Data = 0x44;
-    const uint8_t Tag_Title_Space_Per_Trace        = 0x45;
-    const uint8_t Tag_Trace_Title                  = 0x46;
-    const uint8_t Tag_Description                  = 0x47;
-    const uint8_t Tag_Axis_Offset_X                = 0x48;
-    const uint8_t Tag_Axis_Label_X                 = 0x49;
-    const uint8_t Tag_Axis_Label_Y                 = 0x4A;
-    const uint8_t Tag_Axis_Scale_X                 = 0x4B;
-    const uint8_t Tag_Axis_Scale_Y                 = 0x4C;
-    const uint8_t Tag_Trace_Offset                 = 0x4D;
-    const uint8_t Tag_Logarithmic_Scale            = 0x4E;
+    inline static const uint8_t Tag_Number_Of_Traces             = 0x41;
+    inline static const uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
+    inline static const uint8_t Tag_Sample_Coding                = 0x43;
+    inline static const uint8_t Tag_Length_Of_Cryptographic_Data = 0x44;
+    inline static const uint8_t Tag_Title_Space_Per_Trace        = 0x45;
+    inline static const uint8_t Tag_Trace_Title                  = 0x46;
+    inline static const uint8_t Tag_Description                  = 0x47;
+    inline static const uint8_t Tag_Axis_Offset_X                = 0x48;
+    inline static const uint8_t Tag_Axis_Label_X                 = 0x49;
+    inline static const uint8_t Tag_Axis_Label_Y                 = 0x4A;
+    inline static const uint8_t Tag_Axis_Scale_X                 = 0x4B;
+    inline static const uint8_t Tag_Axis_Scale_Y                 = 0x4C;
+    inline static const uint8_t Tag_Trace_Offset                 = 0x4D;
+    inline static const uint8_t Tag_Logarithmic_Scale            = 0x4E;
     // 0x4F - 0x54 Reserved for future use.
-    const uint8_t Tag_Scope_Range           = 0x55;
-    const uint8_t Tag_Scope_Coupling        = 0x56;
-    const uint8_t Tag_Scope_Offset          = 0x57;
-    const uint8_t Tag_Scope_Input_Impedance = 0x58;
-    const uint8_t Tag_Scope_ID              = 0x59;
-    const uint8_t Tag_Filter_Type           = 0x5A;
-    const uint8_t Tag_Filter_Frequency      = 0x5B;
-    const uint8_t Tag_Filter_Range          = 0x5C;
+    inline static const uint8_t Tag_Scope_Range           = 0x55;
+    inline static const uint8_t Tag_Scope_Coupling        = 0x56;
+    inline static const uint8_t Tag_Scope_Offset          = 0x57;
+    inline static const uint8_t Tag_Scope_Input_Impedance = 0x58;
+    inline static const uint8_t Tag_Scope_ID              = 0x59;
+    inline static const uint8_t Tag_Filter_Type           = 0x5A;
+    inline static const uint8_t Tag_Filter_Frequency      = 0x5B;
+    inline static const uint8_t Tag_Filter_Range          = 0x5C;
     // 0x5D - 0x5E Undocumented.
-    const uint8_t Tag_Trace_Block_Marker               = 0x5F;
-    const uint8_t Tag_External_Clock_Used              = 0x60;
-    const uint8_t Tag_External_Clock_Threshold         = 0x61;
-    const uint8_t Tag_External_Clock_Multiplier        = 0x62;
-    const uint8_t Tag_External_Clock_Phase_Shift       = 0x63;
-    const uint8_t Tag_External_Clock_Resampler_Mask    = 0x64;
-    const uint8_t Tag_External_Clock_Resampler_Enabled = 0x65;
-    const uint8_t Tag_External_Clock_Frequency         = 0x66;
-    const uint8_t Tag_External_Clock_Time_Base         = 0x67;
+    inline static const uint8_t Tag_Trace_Block_Marker               = 0x5F;
+    inline static const uint8_t Tag_External_Clock_Used              = 0x60;
+    inline static const uint8_t Tag_External_Clock_Threshold         = 0x61;
+    inline static const uint8_t Tag_External_Clock_Multiplier        = 0x62;
+    inline static const uint8_t Tag_External_Clock_Phase_Shift       = 0x63;
+    inline static const uint8_t Tag_External_Clock_Resampler_Mask    = 0x64;
+    inline static const uint8_t Tag_External_Clock_Resampler_Enabled = 0x65;
+    inline static const uint8_t Tag_External_Clock_Frequency         = 0x66;
+    inline static const uint8_t Tag_External_Clock_Time_Base         = 0x67;
 
     //! @brief The main entry point. The constructor requires all mandatory
     //! headers to be set as parameters. Optional headers can be set later.
