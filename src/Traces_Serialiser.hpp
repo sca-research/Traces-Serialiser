@@ -108,7 +108,7 @@ private:
     //! allowed in the current context, based on which headers have already been
     //! set.
     //! @param p_tag The tag indicating which header is currently being set.
-    //! @returns This does not return anything as san exception will be thrown
+    //! @throws This does not return anything as an exception will be thrown
     //! if the validation fails.
     void validate(const uint8_t p_tag)
     {
@@ -155,7 +155,7 @@ private:
     //! 11 -> 0B
     //! 20 -> 14
     //! @endcode
-    //! @param p_value The value to be reformated.
+    //! @param p_value The value to be reformatted.
     //! @returns The value represented as a string.
     const std::string hex(const uint8_t p_value) const
     {
