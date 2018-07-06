@@ -33,6 +33,7 @@
 #include <iomanip>        // for setw, setfill
 #include <ios>            // for failure
 #include <sstream>        // for ostringstream
+#include <stdexcept>      // for range_error
 #include <string>         // for string
 #include <unordered_map>  // for unordered_map
 #include <utility>        // for move, pair
@@ -109,8 +110,8 @@ private:
     //! allowed in the current context, based on which headers have already been
     //! set.
     //! @param p_tag The tag indicating which header is currently being set.
-    //! @throws This does not return anything as an exception will be thrown
-    //! if the validation fails.
+    //! @exception std::range_error This does not return anything as an
+    //! exception will be thrown if the validation fails.
     void validate(const uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the external
@@ -125,8 +126,8 @@ private:
                 // ...or it has been set to false
                 0 == m_headers[Tag_External_Clock_Used].second.front())
             {
-                throw("Enable external clock explicitly with "
-                      "Set_External_Clock_Used()");
+                throw std::range_error("Enable external clock explicitly with "
+                                       "Set_External_Clock_Used()");
             }
 
             // Only allow external clock resampler mask to be set if the
@@ -141,8 +142,9 @@ private:
                  0 == m_headers[Tag_External_Clock_Resampler_Enabled]
                           .second.front()))
             {
-                throw("Enable external clock resampler explicitly with "
-                      "Set_External_Clock_Resampler_Enabled()");
+                throw std::range_error(
+                    "Enable external clock resampler explicitly with "
+                    "Set_External_Clock_Resampler_Enabled()");
             }
         }
     }
@@ -259,8 +261,9 @@ public:
     //! @note If the path contains a directory that doesn't exist, it will not
     //! be created, instead an error file be thrown. New files will be created
     //! however.
-    //! @exception Throws an exception if creating the output stream fails for
-    //! any reason. For example, directory doesn't exist.
+    //! @exception std::ios_base::failure Throws an exception if creating the
+    //! output stream fails for any reason. For example, directory doesn't
+    //! exist.
     void Save(const std::string& p_file_path) const
     {
         std::ofstream output_file(p_file_path,
@@ -268,7 +271,8 @@ public:
 
         if (!output_file)
         {
-            throw("An error occurred when preparing the file to be written to");
+            throw std::ios_base::failure(
+                "An error occurred when preparing the file to be written to");
         }
 
         // Output each header
