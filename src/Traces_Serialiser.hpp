@@ -83,8 +83,7 @@ private:
         else
         {
             // Cast to a byte array
-            const unsigned char* bytes_array =
-                reinterpret_cast<const unsigned char*>(&p_data);
+            auto bytes_array = reinterpret_cast<const unsigned char*>(&p_data);
 
             // Convert byte array to byte vector
             bytes_vector = {bytes_array, bytes_array + sizeof(T)};
