@@ -124,7 +124,7 @@ private:
             // ...and external clock used has not been set...
             if (m_headers.find(Tag_External_Clock_Used) == m_headers.end() ||
                 // ...or it has been set to false
-                !m_headers[Tag_External_Clock_Used].second.front())
+                0 == m_headers[Tag_External_Clock_Used].second.front())
             {
                 throw("Enable external clock explicitly with "
                       "Set_External_Clock_Used()");
@@ -139,8 +139,8 @@ private:
                 (m_headers.find(Tag_External_Clock_Resampler_Enabled) ==
                      m_headers.end() ||
                  // ...or it has been set to false
-                 !m_headers[Tag_External_Clock_Resampler_Enabled]
-                      .second.front()))
+                 0 == m_headers[Tag_External_Clock_Resampler_Enabled]
+                          .second.front()))
             {
                 throw("Enable external clock resampler explicitly with "
                       "Set_External_Clock_Resampler_Enabled()");
