@@ -223,8 +223,8 @@ public:
                const uint8_t p_sample_coding, /* TODO: Maybe change sample
                                                  coding to something easy to
                                                  understand? */
-               const std::vector<uint8_t>& p_traces)
-        : m_traces(p_traces)
+               std::vector<uint8_t> p_traces)
+        : m_traces(std::move(p_traces))
     {
         Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
         Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
