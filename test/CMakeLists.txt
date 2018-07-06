@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 2.6)
 include("${PROJECT_SOURCE_DIR}/cmake/Third_Party.cmake")
 
 get_external_header("catch.hpp"
-    "https://raw.githubusercontent.com/CatchOrg/Catch2/master/single_include/catch.hpp")
+    "https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp")
 
 option(${PROJECT_NAME}_CALCULATE_COVERAGE "Setup ready to calculate the code \
 coverage of the unit tests. This adds profiling compiler flags, disables \
@@ -39,9 +39,12 @@ if(${PROJECT_NAME}_CALCULATE_COVERAGE)
     # This will create a directory, "coverage", compile and run the tests and
     # then generate the coverage information for those tests.
     add_custom_target(coverage 
+        # Make a directory to store the coverage report in.
         COMMAND ${CMAKE_COMMAND} -E make_directory
                     ${PROJECT_BINARY_DIR}/coverage
+        # Run the tests
         COMMAND ${EXECUTABLE_OUTPUT_PATH}/tests
+        # Run Gcovr
         COMMAND gcovr ${PROJECT_BINARY_DIR} -r ${PROJECT_SOURCE_DIR}
                     --exclude-unreachable-branches --html --html-details -o
                     ${PROJECT_BINARY_DIR}/coverage/coverage.html
