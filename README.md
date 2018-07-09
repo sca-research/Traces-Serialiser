@@ -10,22 +10,28 @@ than the standard library.
 
 - [Traces_Serialiser](#traces-serialiser)
   * [Usage](#usage)
-    + [Example Usage](#example-usage)
+    + [Usage (C++)](#usage--c---)
+      - [Example Usage (C++)](#example-usage--c---)
+    + [Usage (Python)](#usage--python-)
+      - [Example Usage (Python)](#example-usage--python-)
+    + [Other Languages](#other-languages)
   * [API Documentation](#api-documentation)
   * [Getting started for development](#getting-started-for-development)
     + [Prerequisites](#prerequisites)
       - [Linux](#linux)
       - [MacOS](#macos)
-      - [Windows/Linux](#windows-linux)
+      - [Windows](#windows)
     + [Building](#building)
+    + [Language Bindings](#language-bindings)
     + [Running tests](#running-tests)
       - [Coverage information](#coverage-information)
   * [Configuration Options](#configuration-options)
   * [Built with](#built-with)
   * [License](#license)
 
-
 ## Usage
+
+### Usage (C++)
 
 1) The only file that needs to be included in your program is
 `Traces_Serialiser.hpp` located in the directory `src`.
@@ -34,17 +40,16 @@ than the standard library.
 ```cpp
 #include "Traces_Serialiser.hpp"
 ```
-
 This requires **C++17** or later.
 
-### Example Usage
+#### Example Usage (C++)
 
 This is the most basic way to use the library at the moment.
-```cp
+```cpp
 Traces_Serialiser::Serialiser serialiser(number_of_traces,
                                          samples_per_trace,
                                          sample_coding,
-                                         traces);p
+                                         traces);
 
 serialiser.Save("/file/path/to/save/to");
 ```
@@ -80,6 +85,90 @@ serialiser.Add_Header(0x48, 7);
 
 serialiser.Save("/file/path/to/save/to");
 ```
+
+### Usage (Python)
+
+1) Follow the instructions in the
+[Language Bindings section](#language-bindings) in order to generate
+python bindings.
+
+2) Two files are required: `Traces_Serialiser.py` and `_Traces_Serialiser.so`
+located in the directory 
+```
+/path/to/build/directory/bindings/python
+```
+3) To make use of it, add this line to your program
+```python
+import Traces_Serialiser
+```
+
+#### Example Usage (Python)
+
+Using the python bindings is slightly more complicated than in C++ but it is
+mostly the same.
+```python
+serialiser = Traces_Serialiser.Serialiser(number_of_traces,
+                                          samples_per_trace,
+                                          sample_coding,
+                                          traces)
+
+serialiser.Save("/file/path/to/save/to")
+```
+
+A bytes_vector object is provided as an alternative format for the traces to be
+in. This is exactly the same as a
+[C++ vector.](https://en.cppreference.com/w/cpp/container/vector)
+```python
+traces = Traces_Serialiser.byte_vector()
+
+# Add the traces to this object however you like.
+traces.push_back(trace)
+...
+
+serialiser = Traces_Serialiser.Serialiser(number_of_traces,
+                                          samples_per_trace,
+                                          sample_coding,
+                                          traces)
+
+serialiser.Save("/file/path/to/save/to")
+```
+
+Adding additional headers is simple as all headers have a custom function
+(at the time of writing). Here is an example of a few of them. A full list is
+available in the [API Documentation.](#api-documentation)
+
+```python
+serialiser = Traces_Serialiser.Serialiser(number_of_traces,
+                                          samples_per_trace,
+                                          sample_coding,
+                                          traces)
+
+serialiser.Set_Trace_Title("My traces")
+serialiser.Set_Axis_Scale_Y(0.5f)
+serialiser.Set_External_Clock_Used()
+
+serialiser.Save("/file/path/to/save/to")
+```
+
+Custom headers can also be added through the `Add_Header` method, however this
+is not recommended as it is more error prone.
+```cpp
+serialiser = Traces_Serialiser.Serialiser(number_of_traces,
+                                          samples_per_trace,
+                                          sample_coding, traces)
+
+serialiser.Add_Header(Traces_Serialiser.Serialiser.Tag_Trace_Title,
+                      "My traces")
+
+serialiser.Add_Header(0x48, 7)
+
+serialiser.Save("/file/path/to/save/to")
+```
+
+### Other Languages
+
+Support for other languages can be added upon request providing they are
+[supported by SWIG.](http://www.swig.org/compat.html#SupportedLanguages)
 
 ## API Documentation
 
@@ -154,14 +243,14 @@ Follow the [official CMake install instructions.](https://cmake.org/install/)
 
 ### Building
 
-**The library does not need to be built to be used.** This section is only needed
-for building tests and documentation.
+**The library does not need to be built to be used.** This section is only
+needed for building tests, language bindings and documentation.
 
 1) **Create an empty build directory.**
 
 2) **From the build directory run this command.** This will generate native
 build files for your platform. A specific generator can be specified using the
-"-G *generator*" flag. A [list of generators is available here.]
+`-G *generator*` flag. A [list of generators is available here.]
 (https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 ```
 cmake /path/to/source/directory/
@@ -174,14 +263,33 @@ used manually from this point on.
 cmake --build .
 ```
 
+### Language Bindings
+
+In order to support languages other than C++, wrapper code needs to be
+generated. This can be done using [SWIG.](http://www.swig.org/)
+
+1) Firstly follow the instructions in the
+[**Getting started for Development section.**](#getting-started-for-development)
+
+2) **Ensure that [SWIG](www.swig.org/download.html) is installed.**
+
+3) **Generate the bindings with this command.** This will tell the native build
+system to build the target called bindings which will run SWIG for you.
+```
+cmake --build . --target bindings
+```
+
 ### Running tests
 
-1) **Build the tests with this command.** This will tell the native build system
+1) Firstly follow the instructions in the
+[**Getting started for Development section.**](#getting-started-for-development)
+
+2) **Build the tests with this command.** This will tell the native build system
 to build the target called tests.
 ```
 cmake --build . --target tests
 ```
-2) **Run the tests**
+3) **Run the tests**
 ```
 /path/to/build/directory/bin/tests
 ```
@@ -237,6 +345,8 @@ respective sources when building. Currently this is only used for the
 - [Catch2](https://github.com/catchorg/Catch2)
 - [Gcovr](https://gcovr.com/)
 - [Doxygen](https://www.stack.nl/~dimitri/doxygen)
+- [SWIG](http://www.swig.org/)
+- [markdown-toc](https://github.com/Ecotrust-Canada/markdown-toc)
 
 ## License
 This program is released under license AGPLv3+.

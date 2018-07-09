@@ -43,9 +43,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
 # Warnings are errors
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 
-# Place libraries into a 'lib' folder
-set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/lib)
-
 # Place executables into a 'bin' folder
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
@@ -61,3 +58,6 @@ add_subdirectory(doc)
 
 # Recurse into the "src" subdirectory.
 add_subdirectory(src)
+
+# Recurse into the "bindings" subdirectory.
+ add_subdirectory(bindings)
