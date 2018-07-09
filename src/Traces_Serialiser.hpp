@@ -294,6 +294,9 @@ public:
         }
     }
 
+    // Beyond this point there are only functions designed to simplify the usage
+    // of Add_Header(...)
+
     // TODO: Rename
     void Set_Cryptographic_Data_Length(const uint16_t p_length = 0)
     {
