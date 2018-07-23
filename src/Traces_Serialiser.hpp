@@ -277,6 +277,7 @@ public:
         {
             output_file << trace;
         }
+        output_file.close();
     }
 
     // Beyond this point there are only functions designed to simplify the usage
