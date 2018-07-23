@@ -273,6 +273,9 @@ public:
         // The start of traces is marked by a Trace Block Marker tag.
         output_file << Tag_Trace_Block_Marker;
 
+        // The length of the Trace Block Marker (always 0) is still required.
+        output_file.put(0x00);
+
         for (const auto& trace : m_traces)
         {
             output_file << trace;
