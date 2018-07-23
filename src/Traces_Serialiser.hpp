@@ -149,25 +149,6 @@ private:
         }
     }
 
-    //! @brief This is a utility function used to simplify the syntax of the
-    //! Save() function. This will convert a byte, stored as an uint8_t to a two
-    //! character hex string. This is don't as the Riscure trace format expects
-    //! bytes as two character hex. For example:
-    //! @code
-    //! 4 -> 04
-    //! 11 -> 0B
-    //! 20 -> 14
-    //! @endcode
-    //! @param p_value The value to be reformatted.
-    //! @returns The value represented as a string.
-    const std::string hex(const uint8_t p_value) const
-    {
-        std::ostringstream string_stream(std::ostringstream::out);
-        string_stream << std::setw(2) << std::setfill('0') << std::hex
-                      << +p_value;
-        return string_stream.str();
-    }
-
 public:
     // These variables are intended to improve readability and nothing more.
     // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
@@ -278,19 +259,23 @@ public:
         // Output each header
         for (const auto& header : m_headers)
         {
-            output_file << hex(header.first) << hex(header.second.first);
+            // Output tag and length
+            output_file << header.first << header.second.first;
+
+            // Output value
             for (const auto& value : header.second.second)
             {
-                output_file << hex(value);
+                output_file << value;
             }
         }
 
         // Output the traces
-        // The start of traces is marked by a tag.
-        output_file << hex(Tag_Trace_Block_Marker);
+        // The start of traces is marked by a Trace Block Marker tag.
+        output_file << Tag_Trace_Block_Marker;
+
         for (const auto& trace : m_traces)
         {
-            output_file << hex(trace);
+            output_file << trace;
         }
     }
 
