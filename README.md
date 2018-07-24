@@ -95,7 +95,7 @@ python bindings.
 2) Two files are required: `Traces_Serialiser.py` and `_Traces_Serialiser.so`
 located in the directory 
 ```
-/path/to/build/directory/bindings/python
+/path/to/build/directory/output/bindings/python
 ```
 3) To make use of it, add this line to your program
 ```python
@@ -291,7 +291,7 @@ cmake --build . --target tests
 ```
 3) **Run the tests**
 ```
-/path/to/build/directory/bin/tests
+/path/to/build/directory/output/tests
 ```
 
 #### Coverage information

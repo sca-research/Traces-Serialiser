@@ -15,13 +15,14 @@
     along with Traces-Serialiser.  If not, see <http://www.gnu.org/licenses/>.
 #]=]
 
-# TODO: Create subfolders for each language
-
 FIND_PACKAGE(SWIG)
-INCLUDE(${SWIG_USE_FILE}) #TODO: is this needed?
 
 set(SWIG_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SWIG_INPUT_FILE Traces_Serialiser.i)
+
+# Place files needed for bindings into 'output/bindings' folder
+set(CMAKE_SWIG_OUTDIR ${EXECUTABLE_OUTPUT_PATH}/bindings)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SWIG_OUTDIR})
 
 # These warnings come from swig itself... As -Werror is used this fails
 # to compile. As these are not related to this project they are disabled.
