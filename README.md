@@ -1,4 +1,4 @@
-# Traces_Serialiser
+# Traces Serialiser
 
 Traces Serialiser is a tool that helps to generate
 [side channel analysis](https://en.wikipedia.org/wiki/Side-channel_attack)
