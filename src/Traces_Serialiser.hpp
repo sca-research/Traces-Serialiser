@@ -27,17 +27,17 @@
 #ifndef SRC_TRACES_SERIALISER_HPP
 #define SRC_TRACES_SERIALISER_HPP
 
-#include <algorithm>      // for remove_if
-#include <cstdint>        // for uint8_t
-#include <fstream>        // for ofstream
-#include <iomanip>        // for setw, setfill
-#include <ios>            // for failure
-#include <sstream>        // for ostringstream
-#include <stdexcept>      // for range_error
-#include <string>         // for string
-#include <unordered_map>  // for unordered_map
-#include <utility>        // for move, pair
-#include <vector>         // for vector
+#include <algorithm>  // for remove_if
+#include <cstdint>    // for uint8_t
+#include <fstream>    // for ofstream
+#include <iomanip>    // for setw, setfill
+#include <ios>        // for failure
+#include <map>        // for map
+#include <sstream>    // for ostringstream
+#include <stdexcept>  // for range_error
+#include <string>     // for string
+#include <utility>    // for move, pair
+#include <vector>     // for vector
 
 namespace Traces_Serialiser
 {
@@ -57,8 +57,7 @@ private:
     //! value.
     //! The tag and length are stored as a byte (uint8_t). The value is stored
     //! as one or more bytes (std::vector<uint8_t>).
-    std::unordered_map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>>
-        m_headers;
+    std::map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>> m_headers;
 
     //! This contains the actual side channel analysis traces, stored as bytes
     //! ready to be saved into the output file.
