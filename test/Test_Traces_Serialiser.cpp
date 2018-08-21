@@ -33,17 +33,30 @@
 TEST_CASE("Adding traces"
           "[!throws][traces]")
 {
-    SECTION("Constuctor works")
+    SECTION("Constructor works")
     {
-        REQUIRE_NOTHROW(
-            Traces_Serialiser::Serialiser(1, 5, 0x07, {0, 1, 2, 3, 4}));
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint8_t>(
+            1, 5, 0x01, {0, 1, 2, 3, 4}));
     }
 
     SECTION("2 bytes trace size")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser(
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint8_t>(
             2400, 1, 0x02, {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
                             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}));
+    }
+
+    SECTION("32 bit traces")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint32_t>(
+            1, 5, 0x04, {0, 1000, 299999999, 312789, 498210113}));
+    }
+
+    // TODO: Test if float traces are actually saved correctly.
+    SECTION("Float traces")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<float>(
+            1, 2, 0x02, {0.22548f, 0.001f}));
     }
 }
 
@@ -51,8 +64,7 @@ TEST_CASE("Adding headers"
           "[!throws][headers]")
 {
     std::vector<uint8_t> traces = {0, 1, 2, 3, 4, 5};
-    Traces_Serialiser::Serialiser serialiser =
-        Traces_Serialiser::Serialiser(4, 1, 0x02, traces);
+    Traces_Serialiser::Serialiser<uint8_t> serialiser(4, 1, 0x02, traces);
 
     SECTION("Set Cryptographic Data Length")
     {

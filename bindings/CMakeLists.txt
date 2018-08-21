@@ -24,18 +24,15 @@ set(SWIG_INPUT_FILE Traces_Serialiser.i)
 set(CMAKE_SWIG_OUTDIR ${EXECUTABLE_OUTPUT_PATH}/bindings)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SWIG_OUTDIR})
 
-# These warnings come from swig itself... As -Werror is used this fails
+# Warnings come from swig itself... As -Werror is used this fails
 # to compile. As these are not related to this project they are disabled.
-# TODO: Ensure these are still enabled in src folder
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-all")
-
-# Disable extra clang warnings, if clang is being used.
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything")
-endif()
+# -w (Disbale all warnings) leaves -Wregister on for some reason when using
+# clang
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -Wno-register")
 
 if (SWIG_FOUND)
-    option(${PROJECT_NAME}_BINDINGS_PYTHON "Generate bindings for use from Python. Requires Swig."
+    option(${PROJECT_NAME}_BINDINGS_PYTHON "Generate bindings for use from \
+                                            Python. Requires Swig."
         OFF)
 
     if(${PROJECT_NAME}_BINDINGS_PYTHON)

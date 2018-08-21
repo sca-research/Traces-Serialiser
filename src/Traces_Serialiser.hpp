@@ -45,8 +45,12 @@ namespace Traces_Serialiser
 //! @brief This is the main class that is used in order to serialise traces.
 //! Currently it supports saving in the format used by Riscure's inspector tool.
 //! @see https://www.riscure.com/security-tools/inspector-sca/
-class Serialiser
+template <typename T_Traces> class Serialiser
 {
+    // Ensure that the template type T_Traces is arithmetic.
+    static_assert(std::is_arithmetic<T_Traces>::value,
+                  "Traces must be stored as a number");
+
 private:
     //! This is the main container that stores the trace header information,
     //! ready to be saved into the output file. The format uses a
@@ -61,7 +65,7 @@ private:
 
     //! This contains the actual side channel analysis traces, stored as bytes
     //! ready to be saved into the output file.
-    const std::vector<uint8_t> m_traces;
+    const std::vector<T_Traces> m_traces;
 
     //! @brief Converts the data given by the parameter p_data into a series of
     //! bytes.
@@ -69,24 +73,24 @@ private:
     //! that this function can convert any basic data type and std::string to
     //! bytes.
     //! @returns A series of bytes represented using std::vector<uint8_t>.
-    template <typename T>
-    const std::vector<uint8_t> convert_to_bytes(const T& p_data) const
+    template <typename T_Data>
+    const std::vector<uint8_t> convert_to_bytes(const T_Data& p_data) const
     {
         // A temporary store for the converted bytes.
         std::vector<uint8_t> bytes_vector;
 
         // Strings need to be handled separately.
-        if constexpr (std::is_same<T, std::string>::value)
+        if constexpr (std::is_same<T_Data, std::string>::value)
         {
             bytes_vector = {p_data.begin(), p_data.end()};
         }
         else
         {
             // Cast to a byte array
-            auto bytes_array = reinterpret_cast<const unsigned char*>(&p_data);
+            auto bytes_array = reinterpret_cast<const uint8_t*>(&p_data);
 
             // Convert byte array to byte vector
-            bytes_vector = {bytes_array, bytes_array + sizeof(T)};
+            bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
 
             // Needed to remove trailing 0s
             bytes_vector.erase(
@@ -205,8 +209,8 @@ public:
                const uint8_t p_sample_coding, /* TODO: Maybe change sample
                                                  coding to something easy to
                                                  understand? */
-               std::vector<uint8_t> p_traces)
-        : m_traces(std::move(p_traces))
+               const std::vector<T_Traces>& p_traces)
+        : m_headers(), m_traces(std::move(p_traces))
     {
         Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
         Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
@@ -221,7 +225,8 @@ public:
     //! p_tag.
     //! @note This is public to allow user to add new headers that may not have
     //! functions
-    template <typename T> void Add_Header(const uint8_t& p_tag, const T& p_data)
+    template <typename T_Data>
+    void Add_Header(const uint8_t& p_tag, const T_Data& p_data)
     {
         // TODO: Handle case where bit 8 (msb) is set to '0' in object length.
         // See inspector manual for details.
