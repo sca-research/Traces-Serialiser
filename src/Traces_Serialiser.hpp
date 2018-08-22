@@ -109,6 +109,36 @@ private:
         return bytes_vector;
     }
 
+    //! @todo Document
+    void add_required_headers(const uint32_t p_number_of_traces,
+                              const uint32_t p_samples_per_trace,
+                              const uint8_t p_sample_length)
+    {
+        if (4 < p_sample_length || 3 == p_sample_length)
+        {
+            throw std::range_error("Sample length must be either 1, 2 or 4");
+        }
+
+        Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
+        Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
+
+        uint8_t sample_coding;
+        // If the traces are floating point values, set bit 5 to indicate
+        // this as per the Riscure inspector specification.
+        // TODO: Find out what the sample length should be for floats
+        // TODO: Ensure floats are saved correctly.
+        if constexpr (std::is_floating_point<T_Traces>::value)
+        {
+            sample_coding = p_sample_length | 0b10000;
+        }
+        else
+        {
+            sample_coding = p_sample_length | sizeof(T_Traces);
+        }
+
+        Add_Header(Tag_Sample_Coding, sample_coding);
+    }
+
     //! @brief Ensures that setting the header given by the parameter p_tag is
     //! allowed in the current context, based on which headers have already been
     //! set.
