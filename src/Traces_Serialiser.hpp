@@ -115,40 +115,45 @@ private:
     //! @param p_tag The tag indicating which header is currently being set.
     //! @exception std::range_error This does not return anything as an
     //! exception will be thrown if the validation fails.
-    void validate(const uint8_t p_tag)
+    void validate_header(const uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the external
         // clock has been explicitly enabled.
 
-        // If this is an external clock related header...
-        if (Tag_External_Clock_Threshold <= p_tag &&
-            Tag_External_Clock_Time_Base >= p_tag)
+        // If this is not an external clock related header then no validation is
+        // required.
+        if (Tag_External_Clock_Threshold > p_tag ||
+            Tag_External_Clock_Time_Base < p_tag)
         {
-            // ...and external clock used has not been set...
-            if (m_headers.find(Tag_External_Clock_Used) == m_headers.end() ||
-                // ...or it has been set to false
-                0 == m_headers[Tag_External_Clock_Used].second.front())
-            {
-                throw std::range_error("Enable external clock explicitly with "
-                                       "Set_External_Clock_Used()");
-            }
+            return;
+        }
 
-            // Only allow external clock resampler mask to be set if the
-            // external clock has been explicitly enabled.
+        // If external clock used has not been set...
+        if (m_headers.find(Tag_External_Clock_Used) == m_headers.end() ||
+            // ...or it has been set to false
+            0 == m_headers[Tag_External_Clock_Used].second.front())
+        {
+            throw std::range_error("Enable external clock explicitly with "
+                                   "Set_External_Clock_Used()");
+        }
 
-            // If this is the external clock resampler mask...
-            if (Tag_External_Clock_Resampler_Mask == p_tag &&
-                // ...and the resampler used has not been set...
-                (m_headers.find(Tag_External_Clock_Resampler_Enabled) ==
-                     m_headers.end() ||
-                 // ...or it has been set to false
-                 0 == m_headers[Tag_External_Clock_Resampler_Enabled]
-                          .second.front()))
-            {
-                throw std::range_error(
-                    "Enable external clock resampler explicitly with "
-                    "Set_External_Clock_Resampler_Enabled()");
-            }
+        // Only allow external clock resampler mask to be set if the
+        // external clock has been explicitly enabled.
+
+        // If this is the external clock resampler mask...
+        if (Tag_External_Clock_Resampler_Mask == p_tag &&
+            // ...and the resampler used has not been set...
+            (m_headers.find(Tag_External_Clock_Resampler_Enabled) ==
+                 m_headers.end() ||
+             // ...or it has been set to false
+             0 == m_headers[Tag_External_Clock_Resampler_Enabled]
+                      .second.front()))
+        {
+            throw std::range_error(
+                "Enable external clock resampler explicitly with "
+                "Set_External_Clock_Resampler_Enabled()");
+        }
+    }
         }
     }
 
@@ -231,7 +236,7 @@ public:
         // TODO: Handle case where bit 8 (msb) is set to '0' in object length.
         // See inspector manual for details.
 
-        validate(p_tag);
+        validate_header(p_tag);
 
         // A temporary variable to convert p_data to bytes.
         const std::vector<uint8_t> value = convert_to_bytes(p_data);
