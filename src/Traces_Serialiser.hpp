@@ -65,7 +65,7 @@ private:
 
     //! This contains the actual side channel analysis traces, stored as bytes
     //! ready to be saved into the output file.
-    const std::vector<T_Traces> m_traces;
+    std::vector<uint8_t> m_traces;
 
     //! @brief Converts the data given by the parameter p_data into a series of
     //! bytes.
@@ -275,24 +275,76 @@ public:
     //! @param p_number_of_traces The number of traces to be saved.
     //! @param p_samples_per_trace The number of samples in each individual
     //! trace.
-    //! @param p_sample_coding The sample coding.
+    //! @param p_sample_length The length of a trace sample in bytes.
     //! Bits 8-6 are reserved and must be '000'.
     //! Bit 5 corresponds to integer (0) or floating point (1).
     //! Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
     //! @todo Nothing is currently done with this value.
     //! @param p_traces All of the traces as stored in bytes. @todo in future
     //! possibly allow different formats for p_traces?
-    Serialiser(const uint32_t p_number_of_traces,
+    // TODO: Add support for cryptographic data to be included in each trace.
+    Serialiser(const std::vector<T_Traces>& p_traces,
+               const uint32_t p_number_of_traces,
                const uint32_t p_samples_per_trace,
-               const uint8_t p_sample_coding, /* TODO: Maybe change sample
-                                                 coding to something easy to
-                                                 understand? */
-               const std::vector<T_Traces>& p_traces)
-        : m_headers(), m_traces(std::move(p_traces))
+               const uint8_t p_sample_length)
+        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
-        Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
-        Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
-        Add_Header(Tag_Sample_Coding, p_sample_coding);
+        add_required_headers(
+            p_number_of_traces, p_samples_per_trace, p_sample_length);
+    }
+
+    //! @todo Document
+    // sample length is not specified, it is assumed to be the size of the data
+    // type samples are stored as.
+    Serialiser(const std::vector<T_Traces>& p_traces,
+               const uint32_t p_number_of_traces,
+               const uint8_t p_samples_per_trace)
+        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+    {
+        add_required_headers(
+            p_number_of_traces, p_samples_per_trace, sizeof(T_Traces));
+    }
+
+    //! @todo Document
+    // samples_per_trace is not specified. It is assumed to be the length of one
+    // trace divided by the length of one sample. This allows for p_traces to be
+    // either a vector of traces or a vector of binary data.
+    Serialiser(const std::vector<T_Traces>& p_traces,
+               const uint32_t p_number_of_traces)
+        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+    {
+        const uint8_t sample_length = sizeof(T_Traces);
+
+        // TODO: Add validation to all constructors to ensure each trace is the
+        // same length.
+        // TODO: Add validation to ensure that sample_length * number of traces
+        // * samples_per_trace = p_traces.size()
+
+        const uint32_t samples_per_trace = safe_cast<uint32_t>(
+            p_traces.size() / p_number_of_traces / sample_length);
+
+        add_required_headers(
+            p_number_of_traces, samples_per_trace, sample_length);
+    }
+
+    //! @todo Document
+    // TODO: Add support for cryptographic data to be included in each trace.
+    Serialiser(const std::vector<std::vector<T_Traces>>& p_traces,
+               const uint8_t p_sample_length = sizeof(T_Traces))
+        //: m_traces(convert_to_bytes(p_traces))
+        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+    {
+        // Number of samples per trace can be assumed to be the length of one
+        // trace divided by the length of one sample.
+        // TODO: This doesn't work if there is extra cryptographic data in
+        // p_traces.
+        const uint32_t samples_per_trace =
+            safe_cast<uint32_t>(p_traces.front().size() / p_sample_length);
+
+        // TODO: Verify that each of the traces are the same size.
+        add_required_headers(safe_cast<uint32_t>(p_traces.size()),
+                             samples_per_trace,
+                             p_sample_length);
     }
 
     //! @brief This is this function that adds headers to the list of headers to
