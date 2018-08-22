@@ -184,7 +184,18 @@ private:
                 "Set_External_Clock_Resampler_Enabled()");
         }
     }
+
+    // TODO: This could be replaced with boost numeric cast
+    template <typename T_cast_output, typename T_cast_input>
+    T_cast_output safe_cast(T_cast_input p_input) const
+    {
+        const auto output = static_cast<T_cast_output>(p_input);
+        if (p_input != output)
+        {
+            throw std::range_error("Casting error. Loss of precision detected. "
+                                   "This may lead to inaccurate results.");
         }
+        return output;
     }
 
 public:
