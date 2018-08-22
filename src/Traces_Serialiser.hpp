@@ -110,6 +110,40 @@ private:
     }
 
     //! @todo Document
+    template <typename T_Data>
+    const std::vector<uint8_t>
+    convert_vector_to_bytes(const std::vector<T_Data>& p_data)
+    {
+        std::vector<uint8_t> bytes_vector;
+
+        // for each value in the vector
+        for (const auto& data : p_data)
+        {
+            // http://blog2.emptycrate.com/content/complex-object-initialization-optimization-iife-c11
+            const std::vector<uint8_t> data_vector = [&]() {
+                // If this is nested container, recursively unpack it until
+                // we get at the values inside.
+                if constexpr (!std::is_same<std::vector<T_Data>,
+                                            std::vector<T_Traces>>::value)
+                {
+                    return convert_vector_to_bytes(data);
+                }
+                else  // if this is not a nested container simply convert
+                      // each of the values.
+                {
+                    return convert_to_bytes(data);
+                }
+            }();
+
+            // Append the converted values onto the end of bytes_vector
+            // ready to be returned.
+            bytes_vector.insert(std::end(bytes_vector),
+                                std::begin(data_vector),
+                                std::end(data_vector));
+        }
+        return bytes_vector;
+    }
+
     void add_required_headers(const uint32_t p_number_of_traces,
                               const uint32_t p_samples_per_trace,
                               const uint8_t p_sample_length)
