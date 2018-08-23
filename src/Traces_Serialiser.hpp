@@ -171,29 +171,27 @@ private:
         Add_Header(Tag_Sample_Coding, sample_coding);
     }
 
-    //! @brief Ensures that setting the header given by the parameter p_tag is
-    //! allowed in the current context, based on which headers have already been
-    //! set.
+    //! @brief Ensures that setting the header given by the parameter p_tag
+    //! is allowed in the current context, based on which headers have
+    //! already been set.
     //! @param p_tag The tag indicating which header is currently being set.
     //! @exception std::range_error This does not return anything as an
     //! exception will be thrown if the validation fails.
     void validate_header(const uint8_t p_tag)
     {
-        // Only allow external clock related values to be set if the external
-        // clock has been explicitly enabled.
+        // Only allow external clock related values to be set if the
+        // external clock has been explicitly enabled.
 
-        // If this is not an external clock related header then no validation is
-        // required.
-        if (Tag_External_Clock_Threshold > p_tag ||
-            Tag_External_Clock_Time_Base < p_tag)
+        // If this is not an external clock related header then no
+        // validation is required.
+        if (!is_external_clock_header(p_tag))
         {
             return;
         }
 
-        // If external clock used has not been set...
-        if (m_headers.find(Tag_External_Clock_Used) == m_headers.end() ||
-            // ...or it has been set to false
-            0 == m_headers[Tag_External_Clock_Used].second.front())
+        // Tag_External_Clock_Used must be set before setting any other
+        // Tag_External_Clock_* headers
+        if (!header_enabled(Tag_External_Clock_Used))
         {
             throw std::range_error("Enable external clock explicitly with "
                                    "Set_External_Clock_Used()");
@@ -202,19 +200,55 @@ private:
         // Only allow external clock resampler mask to be set if the
         // external clock has been explicitly enabled.
 
-        // If this is the external clock resampler mask...
-        if (Tag_External_Clock_Resampler_Mask == p_tag &&
-            // ...and the resampler used has not been set...
-            (m_headers.find(Tag_External_Clock_Resampler_Enabled) ==
-                 m_headers.end() ||
-             // ...or it has been set to false
-             0 == m_headers[Tag_External_Clock_Resampler_Enabled]
-                      .second.front()))
+        // If this is not an external clock resampler mask related header
+        // then no further validation is required.
+        if (Tag_External_Clock_Resampler_Mask != p_tag)
+        {
+            return;
+        }
+
+        // Tag_External_Clock_Resampler_Enabled must be set before setting
+        // Tag_External_Clock_Resampler_Mask
+        if (!header_enabled(Tag_External_Clock_Resampler_Enabled))
         {
             throw std::range_error(
                 "Enable external clock resampler explicitly with "
                 "Set_External_Clock_Resampler_Enabled()");
         }
+    }
+
+    //! @brief Determines whether or not the given boolean header has been
+    //! enabled or not.
+    //! @returns If the header has been set to a value other than 0, true is
+    //! return. If it is unset or set to 0 then false is returned.
+    //! @param p_tag The tag indicating which header to check.
+    //! @warning This was designed for headers with boolean values but it
+    //! can be used on any header which will usually give undesired results.
+    bool header_enabled(const uint8_t p_tag) const
+    {
+        // If the header has not been set then it is not enabled
+        if (m_headers.end() == m_headers.find(p_tag))
+        {
+            return false;
+        }
+
+        // If the header has been set to 0 then it is not enabled
+        return 0 != m_headers.at(p_tag).second.front();
+    }
+
+    //! @brief Determines whether or not the tag given by p_tag is related to
+    //! the external clock. All headers related to the external clock lie
+    //! between 0x61 (Tag_External_Clock_Threshold) and 0x67
+    //! (Tag_External_Clock_Time_Base) inclusive. Expect for
+    //! Tag_External_Clock_Used (0x60) which is considered an exception as
+    //! it enables this range of tags to be used.
+    //! @warning This will return false for 0x60 (Tag_External_Clock_Used)
+    //! :param p_tag The tag to be checked.
+    //! @returns True if p_tag is an external clock header and false if not.
+    bool is_external_clock_header(const uint8_t p_tag)
+    {
+        return Tag_External_Clock_Threshold <= p_tag &&
+               Tag_External_Clock_Time_Base >= p_tag;
     }
 
     // TODO: This could be replaced with boost numeric cast
