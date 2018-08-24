@@ -45,17 +45,18 @@
 #ifndef SRC_TRACES_SERIALISER_HPP
 #define SRC_TRACES_SERIALISER_HPP
 
-#include <algorithm>  // for remove_if
-#include <cstdint>    // for uint8_t
-#include <fstream>    // for ofstream
-#include <iomanip>    // for setw, setfill
-#include <ios>        // for failure
-#include <map>        // for map
-#include <sstream>    // for ostringstream
-#include <stdexcept>  // for range_error
-#include <string>     // for string
-#include <utility>    // for move, pair
-#include <vector>     // for vector
+#include <algorithm>    // for remove_if
+#include <cstdint>      // for uint8_t, uint32_t
+#include <fstream>      // for ofstream
+#include <iomanip>      // for setw, setfill
+#include <ios>          // for failure
+#include <map>          // for map
+#include <sstream>      // for ostringstream
+#include <stdexcept>    // for range_error
+#include <string>       // for string
+#include <type_traits>  // for is_arithmetic, is_floating_point, is_same
+#include <utility>      // for move, pair
+#include <vector>       // for vector
 
 namespace Traces_Serialiser
 {
