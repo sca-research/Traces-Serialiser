@@ -8,7 +8,7 @@ traces in a format compatible with
 Traces Serialiser is a C++, single header library that depends on nothing other
 than the standard library.
 
-- [Traces_Serialiser](#traces-serialiser)
+- [Traces Serialiser](#traces-serialiser)
   * [Usage](#usage)
     + [Usage (C++)](#usage-c)
       - [Example Usage (C++)](#example-usage-c)
@@ -46,23 +46,24 @@ This requires **C++17** or later.
 
 This is the most basic way to use the library at the moment.
 ```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces,
-                                         samples_per_trace,
-                                         sample_coding,
-                                         traces);
+Traces_Serialiser::Serialiser<float> serialiser(number_of_traces,
+                                                samples_per_trace,
+                                                sample_coding,
+                                                traces);
 
 serialiser.Save("/file/path/to/save/to");
 ```
+The template parameter refers to the type of the traces. In the above example, `<float>` is used, indicating that the `traces` object is a vector of float values. Any arithmetic type can be used here.
 
 Adding additional headers is simple as all headers have a custom function
 (at the time of writing). Here is an example of a few of them. A full list is
 available in the [API Documentation.](#api-documentation)
 
 ```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces,
-                                         samples_per_trace,
-                                         sample_coding,
-                                         traces);
+Traces_Serialiser::Serialiser<uint8_t> serialiser(number_of_traces,
+                                                  samples_per_trace,
+                                                  sample_coding,
+                                                  traces);
 
 serialiser.Set_Trace_Title("My traces");
 serialiser.Set_Axis_Scale_Y(0.5f);
@@ -74,11 +75,11 @@ serialiser.Save("/file/path/to/save/to");
 Custom headers can also be added through the `Add_Header` method, however this
 is not recommended as it is more error prone.
 ```cpp
-Traces_Serialiser::Serialiser serialiser(number_of_traces,
-                                         samples_per_trace,
-                                         sample_coding, traces);
+Traces_Serialiser::Serialiser<uint32_t> serialiser(number_of_traces,
+                                                   samples_per_trace,
+                                                   sample_coding, traces);
 
-serialiser.Add_Header(Traces_Serialiser::Serialiser::Tag_Trace_Title,
+serialiser.Add_Header(Traces_Serialiser::Serialiser<uint16_t>::Tag_Trace_Title,
                       "My traces");
 
 serialiser.Add_Header(0x48, 7);
@@ -107,28 +108,27 @@ import Traces_Serialiser
 Using the python bindings is slightly more complicated than in C++ but it is
 mostly the same.
 ```python
-serialiser = Traces_Serialiser.Serialiser(number_of_traces,
-                                          samples_per_trace,
-                                          sample_coding,
-                                          traces)
+serialiser = Traces_Serialiser.Serialiser_float(number_of_traces,
+	                                        samples_per_trace,
+	                                        sample_coding,
+                                                traces)
 
 serialiser.Save("/file/path/to/save/to")
 ```
+Instead of templates, there are four separate python classes. Serialiser_8, Serialiser_16 and Serialiser_32 should be used to store unsigned 8, 16 and 32 bit values. Serialiser_float should be used to store floating point values.
 
-A bytes_vector object is provided as an alternative format for the traces to be
-in. This is exactly the same as a
-[C++ vector.](https://en.cppreference.com/w/cpp/container/vector)
+vector_8, vector_16, vector_32 and vector_float objects are provided as an alternative format for the traces to be in. These are exactly the same as a [C++ vector.](https://en.cppreference.com/w/cpp/container/vector)
 ```python
-traces = Traces_Serialiser.byte_vector()
+traces = Traces_Serialiser.vector_8()
 
 # Add the traces to this object however you like.
 traces.push_back(trace)
 ...
 
-serialiser = Traces_Serialiser.Serialiser(number_of_traces,
-                                          samples_per_trace,
-                                          sample_coding,
-                                          traces)
+serialiser = Traces_Serialiser.Serialiser_8(number_of_traces,
+                                            samples_per_trace,
+                                            sample_coding,
+                                            traces)
 
 serialiser.Save("/file/path/to/save/to")
 ```
@@ -138,10 +138,10 @@ Adding additional headers is simple as all headers have a custom function
 available in the [API Documentation.](#api-documentation)
 
 ```python
-serialiser = Traces_Serialiser.Serialiser(number_of_traces,
-                                          samples_per_trace,
-                                          sample_coding,
-                                          traces)
+serialiser = Traces_Serialiser.Serialiser_32(number_of_traces,
+                                             samples_per_trace,
+                                             sample_coding,
+                                             traces)
 
 serialiser.Set_Trace_Title("My traces")
 serialiser.Set_Axis_Scale_Y(0.5f)
@@ -153,11 +153,11 @@ serialiser.Save("/file/path/to/save/to")
 Custom headers can also be added through the `Add_Header` method, however this
 is not recommended as it is more error prone.
 ```cpp
-serialiser = Traces_Serialiser.Serialiser(number_of_traces,
-                                          samples_per_trace,
-                                          sample_coding, traces)
+serialiser = Traces_Serialiser.Serialiser_16(number_of_traces,
+                                             samples_per_trace,
+                                             sample_coding, traces)
 
-serialiser.Add_Header(Traces_Serialiser.Serialiser.Tag_Trace_Title,
+serialiser.Add_Header(Traces_Serialiser.Serialiser_8.Tag_Trace_Title,
                       "My traces")
 
 serialiser.Add_Header(0x48, 7)
@@ -347,6 +347,7 @@ respective sources when building. Currently this is only used for the
 - [Doxygen](https://www.stack.nl/~dimitri/doxygen)
 - [SWIG](http://www.swig.org/)
 - [markdown-toc](https://github.com/Ecotrust-Canada/markdown-toc)
+- [Text to ASCII Art Generator](http://patorjk.com/software/taag/#f=ANSI Shadow)
 
 ## License
 This program is released under license AGPLv3+.
