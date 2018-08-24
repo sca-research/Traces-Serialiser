@@ -25,6 +25,8 @@
 
 #define CATCH_CONFIG_MAIN
 
+#include <cstdint>  // for uint8_t, uint16_t, uint32_t
+
 #include <catch.hpp>  // for Section, StringRef, SECTION, Sectio...
 
 #include "Tests.cpp"
@@ -33,38 +35,69 @@
 TEST_CASE("Adding traces"
           "[!throws][traces]")
 {
-    SECTION("Constructor works")
+    SECTION("Basic constructor")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint8_t>(
-            1, 5, 0x01, {0, 1, 2, 3, 4}));
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {0, 1, 2, 3, 4}, 1, 5, 1));
     }
 
     SECTION("2 bytes trace size")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint8_t>(
-            2400, 1, 0x02, {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
-                            12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}));
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+            2400,
+            1,
+            0x02));
     }
 
     SECTION("32 bit traces")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<uint32_t>(
-            1, 5, 0x04, {0, 1000, 299999999, 312789, 498210113}));
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint32_t>(
+            {0, 1000, 299999999, 312789, 498210113}, 1, 5, 4));
     }
 
     // TODO: Test if float traces are actually saved correctly.
     SECTION("Float traces")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<float>(
-            1, 2, 0x02, {0.22548f, 0.001f}));
+        REQUIRE_NOTHROW(
+            Traces_Serialiser::Serialiser<float>({0.22548f, 0.001f}, 1, 2, 2));
+    }
+
+    // TODO: Work out how to add this test. The expected result is that
+    // compilation will fail.
+    /*
+     *SECTION("String traces")
+     *{
+     *    STATIC_REQUIRE_FALSE(Traces_Serialiser::Serialiser<std::string>(
+     *        1, 2, 0x07, {"Hello", "World!"}));
+     *}
+     */
+
+    SECTION("Constructor without sample length")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {0, 1, 2, 3, 4, 5}, 2, 3));
+    }
+
+    SECTION("Constructor without sample length and number of samples per trace")
+    {
+        REQUIRE_NOTHROW(
+            Traces_Serialiser::Serialiser<std::uint8_t>({0, 1, 2, 3, 4, 5}, 2));
+    }
+
+    SECTION("2D Constructor")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {{0, 1, 2}, {3, 4, 5}}));
     }
 }
 
 TEST_CASE("Adding headers"
           "[!throws][headers]")
 {
-    std::vector<uint8_t> traces = {0, 1, 2, 3, 4, 5};
-    Traces_Serialiser::Serialiser<uint8_t> serialiser(4, 1, 0x02, traces);
+    std::vector<std::uint8_t> traces = {0, 1, 2, 3, 4, 5};
+    Traces_Serialiser::Serialiser<std::uint8_t> serialiser(traces, 4, 1, 2);
 
     SECTION("Set Cryptographic Data Length")
     {
@@ -144,7 +177,7 @@ TEST_CASE("Adding headers"
     SECTION("Set External clock resampler mask after setting external clock "
             "resampler enabled to false")
     {
-        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(true));
+        REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used());
         REQUIRE_NOTHROW(serialiser.Set_External_Clock_Resampler_Enabled(false));
 
         REQUIRE_THROWS_WITH(
