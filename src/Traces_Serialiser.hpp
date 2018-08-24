@@ -74,7 +74,7 @@ private:
     //! bytes.
     //! @returns A series of bytes represented using std::vector<uint8_t>.
     template <typename T_Data>
-    const std::vector<uint8_t> convert_to_bytes(const T_Data& p_data) const
+    static const std::vector<uint8_t> convert_to_bytes(const T_Data& p_data)
     {
         // A temporary store for the converted bytes.
         std::vector<uint8_t> bytes_vector;
@@ -111,7 +111,7 @@ private:
 
     //! @todo Document
     template <typename T_Data>
-    const std::vector<uint8_t>
+    static const std::vector<uint8_t>
     convert_vector_to_bytes(const std::vector<T_Data>& p_data)
     {
         std::vector<uint8_t> bytes_vector;
@@ -245,7 +245,7 @@ private:
     //! @warning This will return false for 0x60 (Tag_External_Clock_Used)
     //! :param p_tag The tag to be checked.
     //! @returns True if p_tag is an external clock header and false if not.
-    bool is_external_clock_header(const uint8_t p_tag)
+    static bool is_external_clock_header(const uint8_t p_tag)
     {
         return Tag_External_Clock_Threshold <= p_tag &&
                Tag_External_Clock_Time_Base >= p_tag;
@@ -253,7 +253,7 @@ private:
 
     // TODO: This could be replaced with boost numeric cast
     template <typename T_cast_output, typename T_cast_input>
-    T_cast_output safe_cast(T_cast_input p_input) const
+    static T_cast_output safe_cast(T_cast_input p_input)
     {
         const auto output = static_cast<T_cast_output>(p_input);
         if (p_input != output)
