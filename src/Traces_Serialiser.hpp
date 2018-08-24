@@ -1,4 +1,22 @@
 /*
+ *    ████████╗██████╗  █████╗  ██████╗███████╗███████╗
+ *    ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝ A tool for saving side
+ *       ██║   ██████╔╝███████║██║     █████╗  ███████╗ channel traces
+ *       ██║   ██╔══██╗██╔══██║██║     ██╔══╝  ╚════██║
+ *       ██║   ██║  ██║██║  ██║╚██████╗███████╗███████║ License : AGPLv3+
+ *       ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚══════╝
+ *
+ *    ███████╗███████╗██████╗ ██╗ █████╗ ██╗     ██╗███████╗███████╗██████╗
+ *    ██╔════╝██╔════╝██╔══██╗██║██╔══██╗██║     ██║██╔════╝██╔════╝██╔══██╗
+ *    ███████╗█████╗  ██████╔╝██║███████║██║     ██║███████╗█████╗  ██████╔╝
+ *    ╚════██║██╔══╝  ██╔══██╗██║██╔══██║██║     ██║╚════██║██╔══╝  ██╔══██╗
+ *    ███████║███████╗██║  ██║██║██║  ██║███████╗██║███████║███████╗██║  ██║
+ *    ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝╚═╝╚══════╝╚══════╝╚═╝  ╚═╝
+ *
+ *    https://github.com/bristol-sca/Traces-Serialiser
+ */
+
+/*
  *  This file is part of Traces-Serialiser.
  *
  *  Traces-Serialiser is free software: you can redistribute it and/or modify it
@@ -43,7 +61,8 @@ namespace Traces_Serialiser
 {
 //! @class Serialiser
 //! @brief This is the main class that is used in order to serialise traces.
-//! Currently it supports saving in the format used by Riscure's inspector tool.
+//! Currently it supports saving in the format used by Riscure's inspector
+//! tool.
 //! @see https://www.riscure.com/security-tools/inspector-sca/
 template <typename T_Traces> class Serialiser
 {
@@ -56,22 +75,23 @@ private:
     //! ready to be saved into the output file. The format uses a
     //! type-length-value encoding to store this information.
     //! @see https://en.wikipedia.org/wiki/Type-length-value
-    //! In this data structure, the headers are indexed by their type in a map.
-    //! The map then contains a pair, which corresponds to the length and the
-    //! value.
-    //! The tag and length are stored as a byte (uint8_t). The value is stored
-    //! as one or more bytes (std::vector<uint8_t>).
+    //! In this data structure, the headers are indexed by their type in a
+    //! map. The map then contains a pair, which corresponds to the length
+    //! and the value. The tag and length are stored as a byte (uint8_t).
+    //! The value is stored as one or more bytes (std::vector<uint8_t>).
     std::map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>> m_headers;
 
-    //! This contains the actual side channel analysis traces, stored as bytes
-    //! ready to be saved into the output file.
+    //! This contains the actual side channel analysis traces, stored as
+    //! bytes ready to be saved into the output file.
+    //! @todo Don't store a traces object. This is simply the value to the
+    //! Tag_Trace_Block_Marker.
     std::vector<uint8_t> m_traces;
 
-    //! @brief Converts the data given by the parameter p_data into a series of
-    //! bytes.
-    //! @param p_data The data to be converted to bytes. This uses templates so
-    //! that this function can convert any basic data type and std::string to
-    //! bytes.
+    //! @brief Converts the data given by the parameter p_data into a series
+    //! of bytes.
+    //! @param p_data The data to be converted to bytes. This uses templates
+    //! so that this function can convert any basic data type and
+    //! std::string to bytes.
     //! @returns A series of bytes represented using std::vector<uint8_t>.
     template <typename T_Data>
     static const std::vector<uint8_t> convert_to_bytes(const T_Data& p_data)
@@ -99,8 +119,8 @@ private:
                                [](const uint8_t byte) { return 0 == byte; }),
                 bytes_vector.end());
 
-            // If bytes_vector is empty then removing trailing 0s has removed
-            // the original value, 0; therefore re add it.
+            // If bytes_vector is empty then removing trailing 0s has
+            // removed the original value, 0; therefore re-add it.
             if (bytes_vector.empty())
             {
                 bytes_vector.push_back(0);
@@ -109,7 +129,14 @@ private:
         return bytes_vector;
     }
 
-    //! @todo Document
+    //! @brief Converts a vector of data given by the parameter p_data into a
+    //! single series of bytes.
+    //! The input can be a nested vector, in which case it will be recursively
+    //! unpacked it and the values inside will be converted to bytes.
+    //! @param p_data A vector or nested vector contained the data to be
+    //! converted to bytes. This uses templates so that this function can
+    //! convert any basic data type and std::string to bytes.
+    //! @returns A series of bytes represented using std::vector<uint8_t>.
     template <typename T_Data>
     static const std::vector<uint8_t>
     convert_vector_to_bytes(const std::vector<T_Data>& p_data)
@@ -119,7 +146,6 @@ private:
         // for each value in the vector
         for (const auto& data : p_data)
         {
-            // http://blog2.emptycrate.com/content/complex-object-initialization-optimization-iife-c11
             const std::vector<uint8_t> data_vector = [&]() {
                 // If this is nested container, recursively unpack it until
                 // we get at the values inside.
@@ -144,6 +170,19 @@ private:
         return bytes_vector;
     }
 
+    //! @brief A helper function to add all of the headers required to be in a
+    //! trace file. The headers currently required are the number of traces, the
+    //! number of samples per trace and the sample coding. The sample coding is
+    //! not required as an input here as it can be calculated based off of the
+    //! length of one sample.
+    //! @note Although Tag_Trace_Block_Marker (0x5F) is a required header, it is
+    //! not included here as it needs to be the last header printed before the
+    //! traces.
+    //! @param p_number_of_traces The total number of traces.
+    //! @param p_samples_per_trace The number of samples within each trace.
+    //! @param p_sample_length The length of a single sample in bytes.
+    //! @exception std::range_error If the sample length is an invalid value
+    //! then this exception will be thrown.
     void add_required_headers(const uint32_t p_number_of_traces,
                               const uint32_t p_samples_per_trace,
                               const uint8_t p_sample_length)
@@ -251,7 +290,16 @@ private:
                Tag_External_Clock_Time_Base >= p_tag;
     }
 
+    //! @brief Statically casts the value given by p_input to the type given by
+    //! T_cast_output whilst ensuring no loss of precision.
+    //! @exception std::range_error If the result of the cast has suffered a
+    //! loss of precision then an exception is thrown.
+    //! @param p_input The value to be cast.
+    //! @tparam T_cast_input The type of the original data.
+    //! @tparam T_cast_output The type to be cast to.
+    //! @returns The cast value.
     // TODO: This could be replaced with boost numeric cast
+    // TODO: ... or later moved to a separate file.
     template <typename T_cast_output, typename T_cast_input>
     static T_cast_output safe_cast(T_cast_input p_input)
     {
@@ -266,8 +314,8 @@ private:
 
 public:
     // These variables are intended to improve readability and nothing more.
-    // Public so user can write code like this: Add_Header(Tag_Number_Of_Traces,
-    // 4);
+    // Public so user can write code like this:
+    // Add_Header(Tag_Number_Of_Traces, 4);
     inline static const uint8_t Tag_Number_Of_Traces             = 0x41;
     inline static const uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
     inline static const uint8_t Tag_Sample_Coding                = 0x43;
@@ -302,21 +350,20 @@ public:
     inline static const uint8_t Tag_External_Clock_Frequency         = 0x66;
     inline static const uint8_t Tag_External_Clock_Time_Base         = 0x67;
 
-    //! @brief The main entry point. The constructor requires all mandatory
-    //! headers to be set as parameters. Optional headers can be set later.
-    //! All traces are currently required to be passed to the constructor as
-    //! well.
+    //! @brief Constructs the Serialiser object and adds all of the mandatory
+    //! data.
+    //! This constructor requires all mandatory headers to be set as
+    //! parameters. Optional headers can be set later. All traces are required
+    //! to be passed to the constructor as well. The mandatory sample coding
+    //! header is calculated from the length of one sample and the data type.
     //! @param p_number_of_traces The number of traces to be saved.
     //! @param p_samples_per_trace The number of samples in each individual
     //! trace.
     //! @param p_sample_length The length of a trace sample in bytes.
-    //! Bits 8-6 are reserved and must be '000'.
-    //! Bit 5 corresponds to integer (0) or floating point (1).
-    //! Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
-    //! @todo Nothing is currently done with this value.
-    //! @param p_traces All of the traces as stored in bytes. @todo in future
-    //! possibly allow different formats for p_traces?
-    // TODO: Add support for cryptographic data to be included in each trace.
+    //! @param p_traces All of the traces as stored either as a vector of bytes
+    //! or as a vector of samples.
+    // TODO: Add support for cryptographic data to be included in each
+    // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
                const uint32_t p_number_of_traces,
                const uint32_t p_samples_per_trace,
@@ -327,9 +374,19 @@ public:
             p_number_of_traces, p_samples_per_trace, p_sample_length);
     }
 
-    //! @todo Document
-    // sample length is not specified, it is assumed to be the size of the data
-    // type samples are stored as.
+    //! @brief Constructs the Serialiser object and adds all of the mandatory
+    //! data.
+    //! This constructor requires the number of traces and number of
+    //! samples per trace to be set as parameters. Optional headers can be set
+    //! later. All traces are required to be passed to the constructor as well.
+    //! @param p_number_of_traces The number of traces to be saved.
+    //! @param p_samples_per_trace The number of samples in each individual
+    //! trace.
+    //! @param p_traces All of the traces as stored as a vector of samples.
+    //! @note The length of one sample is not specified, it is assumed to be the
+    //! size of the data type samples are stored as.
+    // TODO: Add support for cryptographic data to be included in each
+    // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
                const uint32_t p_number_of_traces,
                const uint8_t p_samples_per_trace)
@@ -339,20 +396,30 @@ public:
             p_number_of_traces, p_samples_per_trace, sizeof(T_Traces));
     }
 
-    //! @todo Document
-    // samples_per_trace is not specified. It is assumed to be the length of one
-    // trace divided by the length of one sample. This allows for p_traces to be
-    // either a vector of traces or a vector of binary data.
+    //! @brief Constructs the Serialiser object and adds all of the mandatory
+    //! data.
+    //! This constructor requires the number of traces to be set as a
+    //! parameter. Optional headers can be set later. All traces are
+    //! required to be passed to the constructor as well.
+    //! @param p_number_of_traces The number of traces to be saved.
+    //! @param p_traces All of the traces as stored as a vector of samples.
+    //! @note The length of one sample is not specified, it is assumed to be
+    //! the size of the data type samples are stored as.
+    //! @note The number of samples per trace is not specified. It is
+    //! assumed to be the length of one trace divided by the length of one
+    //! sample.
+    // TODO: Add support for cryptographic data to be included in each
+    // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
                const uint32_t p_number_of_traces)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
         const uint8_t sample_length = sizeof(T_Traces);
 
-        // TODO: Add validation to all constructors to ensure each trace is the
-        // same length.
-        // TODO: Add validation to ensure that sample_length * number of traces
-        // * samples_per_trace = p_traces.size()
+        // TODO: Add validation to all constructors to ensure each trace is
+        // the same length.
+        // TODO: Add validation to ensure that sample_length * number of
+        // traces * samples_per_trace = p_traces.size()
 
         const uint32_t samples_per_trace = safe_cast<uint32_t>(
             p_traces.size() / p_number_of_traces / sample_length);
@@ -361,15 +428,25 @@ public:
             p_number_of_traces, samples_per_trace, sample_length);
     }
 
-    //! @todo Document
-    // TODO: Add support for cryptographic data to be included in each trace.
+    //! @brief Constructs the Serialiser object and adds all of the mandatory
+    //! data.
+    //! Optional headers can be set later. All traces are required to be
+    //! passed to the constructor.
+    //! @param p_traces All of the traces stored as 2D vector. This is
+    //! interpreted as a vector of traces with each trace being a vector of
+    //! samples.
+    //! @param p_sample_length The length of a trace sample in bytes. This can
+    //! optionally be specified. If not specified then it is assumed to be the
+    //! size of the data type samples are stored as.
+    // TODO: Add support for cryptographic data to be included in each
+    // trace.
     Serialiser(const std::vector<std::vector<T_Traces>>& p_traces,
                const uint8_t p_sample_length = sizeof(T_Traces))
         //: m_traces(convert_to_bytes(p_traces))
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
-        // Number of samples per trace can be assumed to be the length of one
-        // trace divided by the length of one sample.
+        // Number of samples per trace can be assumed to be the length of
+        // one trace divided by the length of one sample.
         // TODO: This doesn't work if there is extra cryptographic data in
         // p_traces.
         const uint32_t samples_per_trace =
@@ -381,19 +458,20 @@ public:
                              p_sample_length);
     }
 
-    //! @brief This is this function that adds headers to the list of headers to
-    //! be saved. This is called by all other functions that add headers as it
-    //! is the only place headers are added.
-    //! @param p_tag The tag representing which header is currently being set.
-    //! @param p_data The data that should be assigned to the header given by
-    //! p_tag.
-    //! @note This is public to allow user to add new headers that may not have
-    //! functions
+    //! @brief This is this function that adds headers to the list of
+    //! headers to be saved. This is called by all other functions that add
+    //! headers as it is the only place headers are added.
+    //! @param p_tag The tag representing which header is currently being
+    //! set.
+    //! @param p_data The data that should be assigned to the header given
+    //! by p_tag.
+    //! @note This is public to allow user to add new headers that may not
+    //! have functions
     template <typename T_Data>
     void Add_Header(const uint8_t& p_tag, const T_Data& p_data)
     {
-        // TODO: Handle case where bit 8 (msb) is set to '0' in object length.
-        // See inspector manual for details.
+        // TODO: Handle case where bit 8 (msb) is set to '0' in object
+        // length. See inspector manual for details.
 
         validate_header(p_tag);
 
@@ -407,12 +485,12 @@ public:
     //! @brief This saves the current state of the headers, along with the
     //! traces to a file specified by p_file_path.
     //! @param p_file_path The path of the file to save to.
-    //! @note If the path contains a directory that doesn't exist, it will not
-    //! be created, instead an error file be thrown. New files will be created
-    //! however.
-    //! @exception std::ios_base::failure Throws an exception if creating the
-    //! output stream fails for any reason. For example, directory doesn't
-    //! exist.
+    //! @note If the path contains a directory that doesn't exist, it will
+    //! not be created, instead an error file be thrown. New files will be
+    //! created however.
+    //! @exception std::ios_base::failure Throws an exception if creating
+    //! the output stream fails for any reason. For example, directory
+    //! doesn't exist.
     void Save(const std::string& p_file_path) const
     {
         std::ofstream output_file(p_file_path,
@@ -420,8 +498,8 @@ public:
 
         if (!output_file)
         {
-            throw std::ios_base::failure(
-                "An error occurred when preparing the file to be written to");
+            throw std::ios_base::failure("An error occurred when preparing "
+                                         "the file to be written to");
         }
 
         // Output each header
@@ -441,7 +519,8 @@ public:
         // The start of traces is marked by a Trace Block Marker tag.
         output_file << Tag_Trace_Block_Marker;
 
-        // The length of the Trace Block Marker (always 0) is still required.
+        // The length of the Trace Block Marker (always 0) is still
+        // required.
         output_file.put(0x00);
 
         for (const auto& trace : m_traces)
@@ -451,8 +530,8 @@ public:
         output_file.close();
     }
 
-    // Beyond this point there are only functions designed to simplify the usage
-    // of Add_Header(...)
+    // Beyond this point there are only functions designed to simplify the
+    // usage of the Add_Header function.
 
     // TODO: Rename
     void Set_Cryptographic_Data_Length(const uint16_t p_length = 0)
