@@ -78,27 +78,29 @@ private:
     //! @see https://en.wikipedia.org/wiki/Type-length-value
     //! In this data structure, the headers are indexed by their type in a
     //! map. The map then contains a pair, which corresponds to the length
-    //! and the value. The tag and length are stored as a byte (uint8_t).
-    //! The value is stored as one or more bytes (std::vector<uint8_t>).
-    std::map<uint8_t, std::pair<uint8_t, std::vector<uint8_t>>> m_headers;
+    //! and the value. The tag and length are stored as a byte (std::uint8_t).
+    //! The value is stored as one or more bytes (std::vector<std::uint8_t>).
+    std::map<std::uint8_t, std::pair<std::uint8_t, std::vector<std::uint8_t>>>
+        m_headers;
 
     //! This contains the actual side channel analysis traces, stored as
     //! bytes ready to be saved into the output file.
     //! @todo Don't store a traces object. This is simply the value to the
     //! Tag_Trace_Block_Marker.
-    std::vector<uint8_t> m_traces;
+    std::vector<std::uint8_t> m_traces;
 
     //! @brief Converts the data given by the parameter p_data into a series
     //! of bytes.
     //! @param p_data The data to be converted to bytes. This uses templates
     //! so that this function can convert any basic data type and
     //! std::string to bytes.
-    //! @returns A series of bytes represented using std::vector<uint8_t>.
+    //! @returns A series of bytes represented using std::vector<std::uint8_t>.
     template <typename T_Data>
-    static const std::vector<uint8_t> convert_to_bytes(const T_Data& p_data)
+    static const std::vector<std::uint8_t>
+    convert_to_bytes(const T_Data& p_data)
     {
         // A temporary store for the converted bytes.
-        std::vector<uint8_t> bytes_vector;
+        std::vector<std::uint8_t> bytes_vector;
 
         // Strings need to be handled separately.
         if constexpr (std::is_same<T_Data, std::string>::value)
@@ -108,17 +110,18 @@ private:
         else
         {
             // Cast to a byte array
-            auto bytes_array = reinterpret_cast<const uint8_t*>(&p_data);
+            auto bytes_array = reinterpret_cast<const std::uint8_t*>(&p_data);
 
             // Convert byte array to byte vector
             bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
 
             // Needed to remove trailing 0s
-            bytes_vector.erase(
-                std::remove_if(bytes_vector.begin(),
-                               bytes_vector.end(),
-                               [](const uint8_t byte) { return 0 == byte; }),
-                bytes_vector.end());
+            bytes_vector.erase(std::remove_if(bytes_vector.begin(),
+                                              bytes_vector.end(),
+                                              [](const std::uint8_t byte) {
+                                                  return 0 == byte;
+                                              }),
+                               bytes_vector.end());
 
             // If bytes_vector is empty then removing trailing 0s has
             // removed the original value, 0; therefore re-add it.
@@ -137,17 +140,17 @@ private:
     //! @param p_data A vector or nested vector contained the data to be
     //! converted to bytes. This uses templates so that this function can
     //! convert any basic data type and std::string to bytes.
-    //! @returns A series of bytes represented using std::vector<uint8_t>.
+    //! @returns A series of bytes represented using std::vector<std::uint8_t>.
     template <typename T_Data>
-    static const std::vector<uint8_t>
+    static const std::vector<std::uint8_t>
     convert_vector_to_bytes(const std::vector<T_Data>& p_data)
     {
-        std::vector<uint8_t> bytes_vector;
+        std::vector<std::uint8_t> bytes_vector;
 
         // for each value in the vector
         for (const auto& data : p_data)
         {
-            const std::vector<uint8_t> data_vector = [&]() {
+            const std::vector<std::uint8_t> data_vector = [&]() {
                 // If this is nested container, recursively unpack it until
                 // we get at the values inside.
                 if constexpr (!std::is_same<std::vector<T_Data>,
@@ -184,9 +187,9 @@ private:
     //! @param p_sample_length The length of a single sample in bytes.
     //! @exception std::range_error If the sample length is an invalid value
     //! then this exception will be thrown.
-    void add_required_headers(const uint32_t p_number_of_traces,
-                              const uint32_t p_samples_per_trace,
-                              const uint8_t p_sample_length)
+    void add_required_headers(const std::uint32_t p_number_of_traces,
+                              const std::uint32_t p_samples_per_trace,
+                              const std::uint8_t p_sample_length)
     {
         if (4 < p_sample_length || 3 == p_sample_length)
         {
@@ -200,7 +203,7 @@ private:
         // Bits 8-6 are reserved and must be '000'.
         // Bit 5 corresponds to integer (0) or floating point (1).
         // Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
-        const uint8_t sample_coding = [&]() -> uint8_t {
+        const std::uint8_t sample_coding = [&]() -> std::uint8_t {
             // If the traces are floating point values, set bit 5 to indicate
             // this as per the Riscure inspector specification: Table K.2.
             // Sample coding.
@@ -224,7 +227,7 @@ private:
     //! @param p_tag The tag indicating which header is currently being set.
     //! @exception std::range_error This does not return anything as an
     //! exception will be thrown if the validation fails.
-    void validate_header(const uint8_t p_tag)
+    void validate_header(const std::uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the
         // external clock has been explicitly enabled.
@@ -271,7 +274,7 @@ private:
     //! @param p_tag The tag indicating which header to check.
     //! @warning This was designed for headers with boolean values but it
     //! can be used on any header which will usually give undesired results.
-    bool header_enabled(const uint8_t p_tag) const
+    bool header_enabled(const std::uint8_t p_tag) const
     {
         // If the header has not been set then it is not enabled
         if (m_headers.end() == m_headers.find(p_tag))
@@ -292,7 +295,7 @@ private:
     //! @warning This will return false for 0x60 (Tag_External_Clock_Used)
     //! :param p_tag The tag to be checked.
     //! @returns True if p_tag is an external clock header and false if not.
-    static bool is_external_clock_header(const uint8_t p_tag)
+    static bool is_external_clock_header(const std::uint8_t p_tag)
     {
         return Tag_External_Clock_Threshold <= p_tag &&
                Tag_External_Clock_Time_Base >= p_tag;
@@ -324,39 +327,40 @@ public:
     // These variables are intended to improve readability and nothing more.
     // Public so user can write code like this:
     // Add_Header(Tag_Number_Of_Traces, 4);
-    inline static const uint8_t Tag_Number_Of_Traces             = 0x41;
-    inline static const uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
-    inline static const uint8_t Tag_Sample_Coding                = 0x43;
-    inline static const uint8_t Tag_Length_Of_Cryptographic_Data = 0x44;
-    inline static const uint8_t Tag_Title_Space_Per_Trace        = 0x45;
-    inline static const uint8_t Tag_Trace_Title                  = 0x46;
-    inline static const uint8_t Tag_Description                  = 0x47;
-    inline static const uint8_t Tag_Axis_Offset_X                = 0x48;
-    inline static const uint8_t Tag_Axis_Label_X                 = 0x49;
-    inline static const uint8_t Tag_Axis_Label_Y                 = 0x4A;
-    inline static const uint8_t Tag_Axis_Scale_X                 = 0x4B;
-    inline static const uint8_t Tag_Axis_Scale_Y                 = 0x4C;
-    inline static const uint8_t Tag_Trace_Offset                 = 0x4D;
-    inline static const uint8_t Tag_Logarithmic_Scale            = 0x4E;
+    inline static const std::uint8_t Tag_Number_Of_Traces             = 0x41;
+    inline static const std::uint8_t Tag_Number_Of_Samples_Per_Trace  = 0x42;
+    inline static const std::uint8_t Tag_Sample_Coding                = 0x43;
+    inline static const std::uint8_t Tag_Length_Of_Cryptographic_Data = 0x44;
+    inline static const std::uint8_t Tag_Title_Space_Per_Trace        = 0x45;
+    inline static const std::uint8_t Tag_Trace_Title                  = 0x46;
+    inline static const std::uint8_t Tag_Description                  = 0x47;
+    inline static const std::uint8_t Tag_Axis_Offset_X                = 0x48;
+    inline static const std::uint8_t Tag_Axis_Label_X                 = 0x49;
+    inline static const std::uint8_t Tag_Axis_Label_Y                 = 0x4A;
+    inline static const std::uint8_t Tag_Axis_Scale_X                 = 0x4B;
+    inline static const std::uint8_t Tag_Axis_Scale_Y                 = 0x4C;
+    inline static const std::uint8_t Tag_Trace_Offset                 = 0x4D;
+    inline static const std::uint8_t Tag_Logarithmic_Scale            = 0x4E;
     // 0x4F - 0x54 Reserved for future use.
-    inline static const uint8_t Tag_Scope_Range           = 0x55;
-    inline static const uint8_t Tag_Scope_Coupling        = 0x56;
-    inline static const uint8_t Tag_Scope_Offset          = 0x57;
-    inline static const uint8_t Tag_Scope_Input_Impedance = 0x58;
-    inline static const uint8_t Tag_Scope_ID              = 0x59;
-    inline static const uint8_t Tag_Filter_Type           = 0x5A;
-    inline static const uint8_t Tag_Filter_Frequency      = 0x5B;
-    inline static const uint8_t Tag_Filter_Range          = 0x5C;
+    inline static const std::uint8_t Tag_Scope_Range           = 0x55;
+    inline static const std::uint8_t Tag_Scope_Coupling        = 0x56;
+    inline static const std::uint8_t Tag_Scope_Offset          = 0x57;
+    inline static const std::uint8_t Tag_Scope_Input_Impedance = 0x58;
+    inline static const std::uint8_t Tag_Scope_ID              = 0x59;
+    inline static const std::uint8_t Tag_Filter_Type           = 0x5A;
+    inline static const std::uint8_t Tag_Filter_Frequency      = 0x5B;
+    inline static const std::uint8_t Tag_Filter_Range          = 0x5C;
     // 0x5D - 0x5E Undocumented.
-    inline static const uint8_t Tag_Trace_Block_Marker               = 0x5F;
-    inline static const uint8_t Tag_External_Clock_Used              = 0x60;
-    inline static const uint8_t Tag_External_Clock_Threshold         = 0x61;
-    inline static const uint8_t Tag_External_Clock_Multiplier        = 0x62;
-    inline static const uint8_t Tag_External_Clock_Phase_Shift       = 0x63;
-    inline static const uint8_t Tag_External_Clock_Resampler_Mask    = 0x64;
-    inline static const uint8_t Tag_External_Clock_Resampler_Enabled = 0x65;
-    inline static const uint8_t Tag_External_Clock_Frequency         = 0x66;
-    inline static const uint8_t Tag_External_Clock_Time_Base         = 0x67;
+    inline static const std::uint8_t Tag_Trace_Block_Marker            = 0x5F;
+    inline static const std::uint8_t Tag_External_Clock_Used           = 0x60;
+    inline static const std::uint8_t Tag_External_Clock_Threshold      = 0x61;
+    inline static const std::uint8_t Tag_External_Clock_Multiplier     = 0x62;
+    inline static const std::uint8_t Tag_External_Clock_Phase_Shift    = 0x63;
+    inline static const std::uint8_t Tag_External_Clock_Resampler_Mask = 0x64;
+    inline static const std::uint8_t Tag_External_Clock_Resampler_Enabled =
+        0x65;
+    inline static const std::uint8_t Tag_External_Clock_Frequency = 0x66;
+    inline static const std::uint8_t Tag_External_Clock_Time_Base = 0x67;
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
     //! data.
@@ -373,9 +377,9 @@ public:
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
-               const uint32_t p_number_of_traces,
-               const uint32_t p_samples_per_trace,
-               const uint8_t p_sample_length)
+               const std::uint32_t p_number_of_traces,
+               const std::uint32_t p_samples_per_trace,
+               const std::uint8_t p_sample_length)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
         add_required_headers(
@@ -396,8 +400,8 @@ public:
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
-               const uint32_t p_number_of_traces,
-               const uint8_t p_samples_per_trace)
+               const std::uint32_t p_number_of_traces,
+               const std::uint8_t p_samples_per_trace)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
         add_required_headers(
@@ -419,17 +423,17 @@ public:
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<T_Traces>& p_traces,
-               const uint32_t p_number_of_traces)
+               const std::uint32_t p_number_of_traces)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
-        const uint8_t sample_length = sizeof(T_Traces);
+        const std::uint8_t sample_length = sizeof(T_Traces);
 
         // TODO: Add validation to all constructors to ensure each trace is
         // the same length.
         // TODO: Add validation to ensure that sample_length * number of
         // traces * samples_per_trace = p_traces.size()
 
-        const uint32_t samples_per_trace = safe_cast<uint32_t>(
+        const std::uint32_t samples_per_trace = safe_cast<std::uint32_t>(
             p_traces.size() / p_number_of_traces / sample_length);
 
         add_required_headers(
@@ -449,7 +453,7 @@ public:
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<std::vector<T_Traces>>& p_traces,
-               const uint8_t p_sample_length = sizeof(T_Traces))
+               const std::uint8_t p_sample_length = sizeof(T_Traces))
         //: m_traces(convert_to_bytes(p_traces))
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
@@ -457,11 +461,11 @@ public:
         // one trace divided by the length of one sample.
         // TODO: This doesn't work if there is extra cryptographic data in
         // p_traces.
-        const uint32_t samples_per_trace =
-            safe_cast<uint32_t>(p_traces.front().size() / p_sample_length);
+        const std::uint32_t samples_per_trace =
+            safe_cast<std::uint32_t>(p_traces.front().size() / p_sample_length);
 
         // TODO: Verify that each of the traces are the same size.
-        add_required_headers(safe_cast<uint32_t>(p_traces.size()),
+        add_required_headers(safe_cast<std::uint32_t>(p_traces.size()),
                              samples_per_trace,
                              p_sample_length);
     }
@@ -476,7 +480,7 @@ public:
     //! @note This is public to allow user to add new headers that may not
     //! have functions
     template <typename T_Data>
-    void Add_Header(const uint8_t& p_tag, const T_Data& p_data)
+    void Add_Header(const std::uint8_t& p_tag, const T_Data& p_data)
     {
         // TODO: Handle case where bit 8 (msb) is set to '0' in object
         // length. See inspector manual for details.
@@ -484,7 +488,7 @@ public:
         validate_header(p_tag);
 
         // A temporary variable to convert p_data to bytes.
-        const std::vector<uint8_t> value = convert_to_bytes(p_data);
+        const std::vector<std::uint8_t> value = convert_to_bytes(p_data);
 
         // Add it to the map of headers.
         m_headers[p_tag] = std::make_pair(value.size(), value);
@@ -542,12 +546,12 @@ public:
     // usage of the Add_Header function.
 
     // TODO: Rename
-    void Set_Cryptographic_Data_Length(const uint16_t p_length = 0)
+    void Set_Cryptographic_Data_Length(const std::uint16_t p_length = 0)
     {
         Add_Header(Tag_Length_Of_Cryptographic_Data, p_length);
     }
 
-    void Set_Title_Space_Per_Trace(const uint8_t p_length = 0)
+    void Set_Title_Space_Per_Trace(const std::uint8_t p_length = 0)
     {
         Add_Header(Tag_Title_Space_Per_Trace, p_length);
     }
@@ -562,7 +566,7 @@ public:
         Add_Header(Tag_Description, p_description);
     }
 
-    void Set_Axis_Offset_X(const uint32_t p_offset = 0)
+    void Set_Axis_Offset_X(const std::uint32_t p_offset = 0)
     {
         Add_Header(Tag_Axis_Offset_X, p_offset);
     }
@@ -587,12 +591,12 @@ public:
         Add_Header(Tag_Axis_Scale_Y, p_scale);
     }
 
-    void Set_Trace_Offset(const uint32_t p_offset = 0)
+    void Set_Trace_Offset(const std::uint32_t p_offset = 0)
     {
         Add_Header(Tag_Trace_Offset, p_offset);
     }
 
-    void Set_Logarithmic_Scale(const uint8_t p_scale = 0)
+    void Set_Logarithmic_Scale(const std::uint8_t p_scale = 0)
     {
         Add_Header(Tag_Logarithmic_Scale, p_scale);
     }
@@ -604,7 +608,7 @@ public:
         Add_Header(Tag_Scope_Range, p_range);
     }
 
-    void Set_Scope_Coupling(const uint32_t p_coupling = 0)
+    void Set_Scope_Coupling(const std::uint32_t p_coupling = 0)
     {
         Add_Header(Tag_Scope_Coupling, p_coupling);
     }
@@ -625,7 +629,7 @@ public:
         Add_Header(Tag_Scope_ID, p_id);
     }
 
-    void Set_Filter_Type(const uint32_t p_type = 0)
+    void Set_Filter_Type(const std::uint32_t p_type = 0)
     {
         Add_Header(Tag_Filter_Type, p_type);
     }
@@ -653,17 +657,18 @@ public:
         Add_Header(Tag_External_Clock_Threshold, p_threshold);
     }
 
-    void Set_External_Clock_Multiplier(const uint32_t p_multiplier = 0)
+    void Set_External_Clock_Multiplier(const std::uint32_t p_multiplier = 0)
     {
         Add_Header(Tag_External_Clock_Multiplier, p_multiplier);
     }
 
-    void Set_External_Clock_Phase_Shift(const uint32_t p_phase_shift = 0)
+    void Set_External_Clock_Phase_Shift(const std::uint32_t p_phase_shift = 0)
     {
         Add_Header(Tag_External_Clock_Phase_Shift, p_phase_shift);
     }
 
-    void Set_External_Clock_Resampler_Mask(const uint32_t p_resampler_mask = 0)
+    void
+    Set_External_Clock_Resampler_Mask(const std::uint32_t p_resampler_mask = 0)
     {
         Add_Header(Tag_External_Clock_Resampler_Mask, p_resampler_mask);
     }
