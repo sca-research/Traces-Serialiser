@@ -14,6 +14,11 @@ namespace std {
     %template(vector_16) vector<uint16_t>;
     %template(vector_32) vector<uint32_t>;
     %template(vector_float) vector<float>;
+
+    %template(vector_2d_8) vector<vector<uint8_t>>;
+    %template(vector_2d_16) vector<vector<uint16_t>>;
+    %template(vector_2d_32) vector<vector<uint32_t>>;
+    %template(vector_2d_float) vector<vector<float>>;
 }
 
 %include "Traces_Serialiser.hpp"
