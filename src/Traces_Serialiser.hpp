@@ -195,17 +195,24 @@ private:
         Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
         Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
 
-        uint8_t sample_coding = p_sample_length;
-
-        // If the traces are floating point values, set bit 5 to indicate
-        // this as per the Riscure inspector specification: Table K.2.
-        // Sample coding.
-        // TODO: Find out what the sample length should be for floats
-        // TODO: Ensure floats are saved correctly.
-        if constexpr (std::is_floating_point<T_Traces>::value)
-        {
-            sample_coding |= 0b10000;
-        }
+        // Calculate the sample coding.
+        // Bits 8-6 are reserved and must be '000'.
+        // Bit 5 corresponds to integer (0) or floating point (1).
+        // Bits 4-1 are the sample length in bytes. This must be 1,2 or 4.
+        const uint8_t sample_coding = [&]() -> uint8_t {
+            // If the traces are floating point values, set bit 5 to indicate
+            // this as per the Riscure inspector specification: Table K.2.
+            // Sample coding.
+            // TODO: Find out what the sample length should be for floats
+            // TODO: Ensure floats are saved correctly.
+            if constexpr (std::is_floating_point<T_Traces>::value)
+            {
+                return p_sample_length | 0b10000;
+            }
+            // If the traces are not floating point then the sample coding is
+            // simply the length of one sample.
+            return p_sample_length;
+        }();
 
         Add_Header(Tag_Sample_Coding, sample_coding);
     }
