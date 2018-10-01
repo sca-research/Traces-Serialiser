@@ -227,7 +227,7 @@ private:
     //! @param p_tag The tag indicating which header is currently being set.
     //! @exception std::range_error This does not return anything as an
     //! exception will be thrown if the validation fails.
-    void validate_header(const std::uint8_t p_tag)
+    constexpr void validate_header(const std::uint8_t p_tag)
     {
         // Only allow external clock related values to be set if the
         // external clock has been explicitly enabled.
@@ -274,7 +274,7 @@ private:
     //! @param p_tag The tag indicating which header to check.
     //! @warning This was designed for headers with boolean values but it
     //! can be used on any header which will usually give undesired results.
-    bool header_enabled(const std::uint8_t p_tag) const
+    constexpr bool header_enabled(const std::uint8_t p_tag) const
     {
         // If the header has not been set then it is not enabled
         if (m_headers.end() == m_headers.find(p_tag))
@@ -295,7 +295,7 @@ private:
     //! @warning This will return false for 0x60 (Tag_External_Clock_Used)
     //! :param p_tag The tag to be checked.
     //! @returns True if p_tag is an external clock header and false if not.
-    static bool is_external_clock_header(const std::uint8_t p_tag)
+    constexpr static bool is_external_clock_header(const std::uint8_t p_tag)
     {
         return Tag_External_Clock_Threshold <= p_tag &&
                Tag_External_Clock_Time_Base >= p_tag;
@@ -312,9 +312,9 @@ private:
     // TODO: This could be replaced with boost numeric cast
     // TODO: ... or later moved to a separate file.
     template <typename T_cast_output, typename T_cast_input>
-    static T_cast_output safe_cast(T_cast_input p_input)
+    constexpr static T_cast_output safe_cast(T_cast_input p_input)
     {
-        const auto output = static_cast<T_cast_output>(p_input);
+        constexpr auto output = static_cast<T_cast_output>(p_input);
         if (p_input != output)
         {
             throw std::range_error("Casting error. Loss of precision detected. "
