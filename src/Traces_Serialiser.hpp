@@ -158,11 +158,9 @@ private:
                 {
                     return convert_vector_to_bytes(data);
                 }
-                else  // if this is not a nested container simply convert
-                      // each of the values.
-                {
-                    return convert_to_bytes(data);
-                }
+                // if this is not a nested container simply convert
+                // each of the values.
+                return convert_to_bytes(data);
             }();
 
             // Append the converted values onto the end of bytes_vector
