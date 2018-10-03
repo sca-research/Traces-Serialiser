@@ -65,10 +65,10 @@ namespace Traces_Serialiser
 //! Currently it supports saving in the format used by Riscure's inspector
 //! tool.
 //! @see https://www.riscure.com/security-tools/inspector-sca/
-template <typename T_Traces> class Serialiser
+template <typename T_Sample> class Serialiser
 {
-    // Ensure that the template type T_Traces is arithmetic.
-    static_assert(std::is_arithmetic<T_Traces>::value,
+    // Ensure that the template type T_Sample is arithmetic.
+    static_assert(std::is_arithmetic<T_Sample>::value,
                   "Traces must be stored as a number");
 
 private:
@@ -141,7 +141,7 @@ private:
     //! converted to bytes. This uses templates so that this function can
     //! convert any basic data type and std::string to bytes.
     //! @returns A series of bytes represented using std::vector<std::uint8_t>.
-    template <typename T_Data>
+    template <typename T_Traces>
     static const std::vector<std::uint8_t>
     convert_vector_to_bytes(const std::vector<T_Data>& p_data)
     {
@@ -153,8 +153,8 @@ private:
             const std::vector<std::uint8_t> data_vector = [&]() {
                 // If this is nested container, recursively unpack it until
                 // we get at the values inside.
-                if constexpr (!std::is_same<std::vector<T_Data>,
-                                            std::vector<T_Traces>>::value)
+                if constexpr (!std::is_same<std::vector<T_Traces>,
+                                            std::vector<T_Sample>>::value)
                 {
                     return convert_vector_to_bytes(data);
                 }
@@ -208,7 +208,7 @@ private:
             // Sample coding.
             // TODO: Find out what the sample length should be for floats
             // TODO: Ensure floats are saved correctly.
-            if constexpr (std::is_floating_point<T_Traces>::value)
+            if constexpr (std::is_floating_point<T_Sample>::value)
             {
                 return p_sample_length | 0b10000;
             }
@@ -375,7 +375,7 @@ public:
     //! or as a vector of samples.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
-    Serialiser(const std::vector<T_Traces>& p_traces,
+    Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces,
                const std::uint32_t p_samples_per_trace,
                const std::uint8_t p_sample_length)
@@ -398,13 +398,13 @@ public:
     //! size of the data type samples are stored as.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
-    Serialiser(const std::vector<T_Traces>& p_traces,
+    Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces,
                const std::uint8_t p_samples_per_trace)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
         add_required_headers(
-            p_number_of_traces, p_samples_per_trace, sizeof(T_Traces));
+            p_number_of_traces, p_samples_per_trace, sizeof(T_Sample));
     }
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
@@ -421,7 +421,7 @@ public:
     //! sample.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
-    Serialiser(const std::vector<T_Traces>& p_traces,
+    Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces)
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
@@ -451,8 +451,8 @@ public:
     //! size of the data type samples are stored as.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
-    Serialiser(const std::vector<std::vector<T_Traces>>& p_traces,
-               const std::uint8_t p_sample_length = sizeof(T_Traces))
+    Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
+               const std::uint8_t p_sample_length = sizeof(T_Sample))
         //: m_traces(convert_to_bytes(p_traces))
         : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
     {
