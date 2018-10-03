@@ -133,6 +133,27 @@ private:
         return bytes_vector;
     }
 
+    //! @brief This function is intended to ensure that each trace is of the
+    //! correct length as defined by p_sample_length by padding it with 0s. If
+    //! the length of the sample is already greater than or equal to
+    //! p_sample_length, no action will be taken. This may result in implicit
+    //! shortening of the value but most modern compiliers will pick this up.
+    //! @param p_sample The sample to be padded to the correct length as a
+    //! vector of bytes.
+    //! @param p_sample_length The length the sample will be padded to.
+    //! @return Returns a copy of the original sample vector, padded with 0s to
+    //! the length given by p_sample_length.
+    static const std::vector<std::uint8_t>
+    pad_traces(std::vector<std::uint8_t> p_sample,
+               const std::uint8_t p_sample_length)
+    {
+        while (p_sample.size() < p_sample_length)
+        {
+            p_sample.insert(p_sample.begin(), 0);
+        }
+        return p_sample;
+    }
+
     //! @brief Converts a vector of data given by the parameter p_data into a
     //! single series of bytes.
     //! The input can be a nested vector, in which case it will be recursively
@@ -140,10 +161,13 @@ private:
     //! @param p_data A vector or nested vector contained the data to be
     //! converted to bytes. This uses templates so that this function can
     //! convert any basic data type and std::string to bytes.
+    //! @param p_sample_length The length each sample should be. This is used to
+    //! pad each individual sample to the correct length.
     //! @returns A series of bytes represented using std::vector<std::uint8_t>.
     template <typename T_Traces>
     static const std::vector<std::uint8_t>
-    convert_vector_to_bytes(const std::vector<T_Data>& p_data)
+    convert_traces_to_bytes(const std::vector<T_Traces>& p_data,
+                            const std::uint8_t p_sample_length)
     {
         std::vector<std::uint8_t> bytes_vector;
 
@@ -156,11 +180,11 @@ private:
                 if constexpr (!std::is_same<std::vector<T_Traces>,
                                             std::vector<T_Sample>>::value)
                 {
-                    return convert_vector_to_bytes(data);
+                    return convert_traces_to_bytes(data, p_sample_length);
                 }
                 // if this is not a nested container simply convert
                 // each of the values.
-                return convert_to_bytes(data);
+                return pad_traces(convert_to_bytes(data), p_sample_length);
             }();
 
             // Append the converted values onto the end of bytes_vector
@@ -379,7 +403,8 @@ public:
                const std::uint32_t p_number_of_traces,
                const std::uint32_t p_samples_per_trace,
                const std::uint8_t p_sample_length)
-        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+        : m_headers(),
+          m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
     {
         add_required_headers(
             p_number_of_traces, p_samples_per_trace, p_sample_length);
@@ -401,7 +426,8 @@ public:
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces,
                const std::uint8_t p_samples_per_trace)
-        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+        : m_headers(),
+          m_traces(convert_traces_to_bytes(p_traces, sizeof(T_Sample)))
     {
         add_required_headers(
             p_number_of_traces, p_samples_per_trace, sizeof(T_Sample));
@@ -423,7 +449,8 @@ public:
     // trace.
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces)
-        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+        : m_headers(),
+          m_traces(convert_traces_to_bytes(p_traces, sizeof(T_Sample)))
     {
         const std::uint8_t sample_length = sizeof(T_Traces);
 
@@ -453,8 +480,8 @@ public:
     // trace.
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
-        //: m_traces(convert_to_bytes(p_traces))
-        : m_headers(), m_traces(convert_vector_to_bytes(p_traces))
+        : m_headers(),
+          m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
     {
         // Number of samples per trace can be assumed to be the length of
         // one trace divided by the length of one sample.
