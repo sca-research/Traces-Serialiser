@@ -387,50 +387,33 @@ public:
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
     //! data.
-    //! This constructor requires all mandatory headers to be set as
-    //! parameters. Optional headers can be set later. All traces are required
-    //! to be passed to the constructor as well. The mandatory sample coding
-    //! header is calculated from the length of one sample and the data type.
+    //! This constructor requires the number of traces and number of
+    //! samples per trace to be set as parameters. The mandatory sample coding
+    //! header is calculated from the length of one sample. Optional headers can
+    //! be set later. All traces are required to be passed to the constructor as
+    //! well.
     //! @param p_number_of_traces The number of traces to be saved.
     //! @param p_samples_per_trace The number of samples in each individual
     //! trace.
-    //! @param p_sample_length The length of a trace sample in bytes.
-    //! @param p_traces All of the traces as stored either as a vector of bytes
-    //! or as a vector of samples.
+    //! @param p_traces All of the traces as stored as a vector of samples.
+    //! @param p_sample_length The length of a trace sample in bytes. This can
+    //! optionally be specified. If not specified then it is assumed to be the
+    //! size of the data type samples are stored as, given by T_Sample.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces,
                const std::uint32_t p_samples_per_trace,
-               const std::uint8_t p_sample_length)
+               const std::uint8_t p_sample_length = sizeof(T_Sample))
         : m_headers(),
           m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
     {
+        // TODO: Add validation to ensure that sample_length * number of
+        // traces * samples_per_trace = p_traces.size()
+        // TODO: Add more validation to sample length. x8 cannot be longer than
+        // sizeof(T_Sample)
         add_required_headers(
             p_number_of_traces, p_samples_per_trace, p_sample_length);
-    }
-
-    //! @brief Constructs the Serialiser object and adds all of the mandatory
-    //! data.
-    //! This constructor requires the number of traces and number of
-    //! samples per trace to be set as parameters. Optional headers can be set
-    //! later. All traces are required to be passed to the constructor as well.
-    //! @param p_number_of_traces The number of traces to be saved.
-    //! @param p_samples_per_trace The number of samples in each individual
-    //! trace.
-    //! @param p_traces All of the traces as stored as a vector of samples.
-    //! @note The length of one sample is not specified, it is assumed to be the
-    //! size of the data type samples are stored as.
-    // TODO: Add support for cryptographic data to be included in each
-    // trace.
-    Serialiser(const std::vector<T_Sample>& p_traces,
-               const std::uint32_t p_number_of_traces,
-               const std::uint8_t p_samples_per_trace)
-        : m_headers(),
-          m_traces(convert_traces_to_bytes(p_traces, sizeof(T_Sample)))
-    {
-        add_required_headers(
-            p_number_of_traces, p_samples_per_trace, sizeof(T_Sample));
     }
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
@@ -570,6 +553,8 @@ public:
 
     // Beyond this point there are only functions designed to simplify the
     // usage of the Add_Header function.
+    // The default parameters in the following functions are copied from the
+    // Riscure inspector documentation.
 
     // TODO: Rename
     void Set_Cryptographic_Data_Length(const std::uint16_t p_length = 0)
