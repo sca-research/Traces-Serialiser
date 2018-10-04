@@ -46,6 +46,7 @@
 #define SRC_TRACES_SERIALISER_HPP
 
 #include <algorithm>    // for remove_if
+#include <cstddef>      // for byte
 #include <cstdint>      // for uint8_t, uint32_t
 #include <fstream>      // for ofstream
 #include <iomanip>      // for setw, setfill
@@ -78,56 +79,63 @@ private:
     //! @see https://en.wikipedia.org/wiki/Type-length-value
     //! In this data structure, the headers are indexed by their type in a
     //! map. The map then contains a pair, which corresponds to the length
-    //! and the value. The tag and length are stored as a byte (std::uint8_t).
-    //! The value is stored as one or more bytes (std::vector<std::uint8_t>).
-    std::map<std::uint8_t, std::pair<std::uint8_t, std::vector<std::uint8_t>>>
+    //! and the value. The tag and length are stored as a byte.
+    //! The value is stored as one or more bytes (std::vector<std::byte>).
+    std::map<std::uint8_t, std::pair<std::uint8_t, std::vector<std::byte>>>
         m_headers;
 
     //! This contains the actual side channel analysis traces, stored as
     //! bytes ready to be saved into the output file.
     //! @todo Don't store a traces object. This is simply the value to the
     //! Tag_Trace_Block_Marker.
-    std::vector<std::uint8_t> m_traces;
+    //! @todo Change this to std:byte:
+    std::vector<std::byte> m_traces;
 
     //! @brief Converts the data given by the parameter p_data into a series
     //! of bytes.
     //! @param p_data The data to be converted to bytes. This uses templates
     //! so that this function can convert any basic data type and
     //! std::string to bytes.
-    //! @returns A series of bytes represented using std::vector<std::uint8_t>.
+    //! @returns A series of bytes represented using std::vector<std::byte>.
+    //! @todo See if this can all be replaced by std::bitset?
     template <typename T_Data>
-    static const std::vector<std::uint8_t>
-    convert_to_bytes(const T_Data& p_data)
+    static const std::vector<std::byte> convert_to_bytes(const T_Data& p_data)
     {
         // A temporary store for the converted bytes.
-        std::vector<std::uint8_t> bytes_vector;
+        std::vector<std::byte> bytes_vector;
 
         // Strings need to be handled separately.
         if constexpr (std::is_same<T_Data, std::string>::value)
         {
-            bytes_vector = {p_data.begin(), p_data.end()};
+            // Get a char array from the string and cast it to a byte array
+            auto bytes_array =
+                reinterpret_cast<const std::byte*>(p_data.c_str());
+
+            // Convert byte array to byte vector
+            bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
         }
         else
         {
             // Cast to a byte array
-            auto bytes_array = reinterpret_cast<const std::uint8_t*>(&p_data);
+            auto bytes_array = reinterpret_cast<const std::byte*>(&p_data);
 
             // Convert byte array to byte vector
             bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
 
             // Needed to remove trailing 0s
-            bytes_vector.erase(std::remove_if(bytes_vector.begin(),
-                                              bytes_vector.end(),
-                                              [](const std::uint8_t byte) {
-                                                  return 0 == byte;
-                                              }),
-                               bytes_vector.end());
+            bytes_vector.erase(
+                std::remove_if(bytes_vector.begin(),
+                               bytes_vector.end(),
+                               [](const std::byte byte) {
+                                   return 0 == std::to_integer<uint8_t>(byte);
+                               }),
+                bytes_vector.end());
 
             // If bytes_vector is empty then removing trailing 0s has
             // removed the original value, 0; therefore re-add it.
             if (bytes_vector.empty())
             {
-                bytes_vector.push_back(0);
+                bytes_vector.push_back(std::byte{0});
             }
         }
         return bytes_vector;
@@ -143,13 +151,13 @@ private:
     //! @param p_sample_length The length the sample will be padded to.
     //! @return Returns a copy of the original sample vector, padded with 0s to
     //! the length given by p_sample_length.
-    static const std::vector<std::uint8_t>
-    pad_traces(std::vector<std::uint8_t> p_sample,
+    static const std::vector<std::byte>
+    pad_traces(std::vector<std::byte> p_sample,
                const std::uint8_t p_sample_length)
     {
         while (p_sample.size() < p_sample_length)
         {
-            p_sample.insert(p_sample.begin(), 0);
+            p_sample.insert(p_sample.begin(), std::byte{0});
         }
         return p_sample;
     }
@@ -163,18 +171,18 @@ private:
     //! convert any basic data type and std::string to bytes.
     //! @param p_sample_length The length each sample should be. This is used to
     //! pad each individual sample to the correct length.
-    //! @returns A series of bytes represented using std::vector<std::uint8_t>.
+    //! @returns A series of bytes represented using std::vector<std::byte>.
     template <typename T_Traces>
-    static const std::vector<std::uint8_t>
+    static const std::vector<std::byte>
     convert_traces_to_bytes(const std::vector<T_Traces>& p_data,
                             const std::uint8_t p_sample_length)
     {
-        std::vector<std::uint8_t> bytes_vector;
+        std::vector<std::byte> bytes_vector;
 
         // for each value in the vector
         for (const auto& data : p_data)
         {
-            const std::vector<std::uint8_t> data_vector = [&]() {
+            const std::vector<std::byte> data_vector = [&]() {
                 // If this is nested container, recursively unpack it until
                 // we get at the values inside.
                 if constexpr (!std::is_same<std::vector<T_Traces>,
@@ -307,7 +315,7 @@ private:
         }
 
         // If the header has been set to 0 then it is not enabled
-        return 0 != m_headers.at(p_tag).second.front();
+        return 0 != std::to_integer<bool>(m_headers.at(p_tag).second.front());
     }
 
     //! @brief Determines whether or not the tag given by p_tag is related to
@@ -499,7 +507,7 @@ public:
         validate_header(p_tag);
 
         // A temporary variable to convert p_data to bytes.
-        const std::vector<std::uint8_t> value = convert_to_bytes(p_data);
+        const std::vector<std::byte> value = convert_to_bytes(p_data);
 
         // Add it to the map of headers.
         m_headers[p_tag] = std::make_pair(value.size(), value);
@@ -534,7 +542,7 @@ public:
             // Output value
             for (const auto& value : header.second.second)
             {
-                output_file << value;
+                output_file << std::to_integer<uint8_t>(value);
             }
         }
 
@@ -548,7 +556,7 @@ public:
 
         for (const auto& trace : m_traces)
         {
-            output_file << trace;
+            output_file << std::to_integer<uint8_t>(trace);
         }
         output_file.close();
     }
