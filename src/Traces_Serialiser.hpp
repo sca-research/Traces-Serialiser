@@ -452,8 +452,8 @@ public:
         // TODO: Add validation to ensure that sample_length * number of
         // traces * samples_per_trace = p_traces.size()
 
-        const std::uint32_t samples_per_trace = safe_cast<std::uint32_t>(
-            p_traces.size() / p_number_of_traces / sample_length);
+        const std::uint32_t samples_per_trace =
+            safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces);
 
         add_required_headers(
             p_number_of_traces, samples_per_trace, sample_length);
@@ -477,11 +477,11 @@ public:
           m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
     {
         // Number of samples per trace can be assumed to be the length of
-        // one trace divided by the length of one sample.
+        // one trace.
         // TODO: This doesn't work if there is extra cryptographic data in
         // p_traces.
         const std::uint32_t samples_per_trace =
-            safe_cast<std::uint32_t>(p_traces.front().size() / p_sample_length);
+            safe_cast<std::uint32_t>(p_traces.front().size());
 
         // TODO: Verify that each of the traces are the same size.
         add_required_headers(safe_cast<std::uint32_t>(p_traces.size()),
