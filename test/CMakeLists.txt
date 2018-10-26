@@ -30,24 +30,28 @@ optimisations and adds the 'coverage' target. Requires Gcovr."
 if(${PROJECT_NAME}_CALCULATE_COVERAGE)
     # Enable profiling for code coverage
     # PARENT_SCOPE is needed for these flags to persist outside this directory
-    set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage" PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage -fPIC -fno-inline -fno-inline-small-functions -fno-default-inline" PARENT_SCOPE)
     # Second call is needed to set these in the current directory
-    set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
-    
+    set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage -fPIC -fno-inline -fno-inline-small-functions -fno-default-inline")
+
     # A custom command to generate a html code coverage report using gcovr. 
     # (https://gcovr.com/)
     # This will create a directory, "coverage", compile and run the tests and
     # then generate the coverage information for those tests.
-    add_custom_target(coverage 
+    add_custom_target(coverage
         # Make a directory to store the coverage report in.
         COMMAND ${CMAKE_COMMAND} -E make_directory
                     ${PROJECT_BINARY_DIR}/coverage
         # Run the tests
         COMMAND ${EXECUTABLE_OUTPUT_PATH}/tests
         # Run Gcovr
-        COMMAND gcovr ${PROJECT_BINARY_DIR} -r ${PROJECT_SOURCE_DIR}
-                    --exclude-unreachable-branches --html --html-details -o
-                    ${PROJECT_BINARY_DIR}/coverage/coverage.html
+        COMMAND gcovr ${PROJECT_BINARY_DIR}
+                    -r ${PROJECT_SOURCE_DIR}
+                    --exclude-unreachable-branches
+                    --filter ${PROJECT_SOURCE_DIR}/src
+                    --html
+                    --html-details
+                    -o ${PROJECT_BINARY_DIR}/coverage/coverage.html
             DEPENDS tests
             COMMENT "Generating HTML coverage report"
     )
