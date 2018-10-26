@@ -58,8 +58,8 @@ if(${PROJECT_NAME}_CALCULATE_COVERAGE)
 endif(${PROJECT_NAME}_CALCULATE_COVERAGE)
 
 # Make test executable
-set(TEST_SOURCES Test_Traces_Serialiser.cpp)
-add_executable(tests ${TEST_SOURCES})
+add_executable(tests
+    Tests.cpp)
 
 # Include the src being tested
 target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/src
