@@ -112,7 +112,7 @@ private:
                 reinterpret_cast<const std::byte*>(p_data.c_str());
 
             // Convert byte array to byte vector
-            bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
+            bytes_vector = {bytes_array, bytes_array + p_data.size()};
         }
         else
         {
