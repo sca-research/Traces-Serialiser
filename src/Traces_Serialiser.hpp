@@ -148,23 +148,23 @@ private:
 
     //! @brief This function is intended to ensure that each trace is of the
     //! correct length as defined by p_sample_length by padding it with 0s. If
-    //! the length of the sample is already greater than or equal to
+    //! the length of the data is already greater than or equal to
     //! p_sample_length, no action will be taken. This may result in implicit
     //! shortening of the value but most modern compiliers will pick this up.
-    //! @param p_sample The sample to be padded to the correct length as a
+    //! @param p_data The data to be padded to the correct length as a
     //! vector of bytes.
-    //! @param p_sample_length The length the sample will be padded to.
-    //! @return Returns a copy of the original sample vector, padded with 0s to
+    //! @param p_length The length the data will be padded to.
+    //! @return Returns a copy of the original data vector, padded with 0s to
     //! the length given by p_sample_length.
     static const std::vector<std::byte>
-    pad_traces(std::vector<std::byte> p_sample,
-               const std::uint8_t p_sample_length)
+    // TODO: why is p_data not const & or pointer at least?
+    pad(std::vector<std::byte> p_data, const std::uint8_t p_length)
     {
-        while (p_sample.size() < p_sample_length)
+        while (p_data.size() < p_length)
         {
-            p_sample.insert(p_sample.begin(), std::byte{0});
+            p_data.insert(p_data.begin(), std::byte{0});
         }
-        return p_sample;
+        return p_data;
     }
 
     //! @brief Converts a vector of data given by the parameter p_data into a
@@ -197,7 +197,7 @@ private:
                 }
                 // if this is not a nested container simply convert
                 // each of the values.
-                return pad_traces(convert_to_bytes(data), p_sample_length);
+                return pad(convert_to_bytes(data), p_sample_length);
             }();
 
             // Append the converted values onto the end of bytes_vector
