@@ -705,7 +705,8 @@ public:
         Add_Header(Tag_External_Clock_Frequency, p_frequency);
     }
 
-    void Set_External_Clock_Time_Base(const float p_time_base = 0)
+    // TODO: All int headers are unsigned, Change them to signed?
+    void Set_External_Clock_Time_Base(const std::uint32_t p_time_base = 0)
     {
         Add_Header(Tag_External_Clock_Time_Base, p_time_base);
     }
