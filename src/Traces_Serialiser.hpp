@@ -122,20 +122,25 @@ private:
             // Convert byte array to byte vector
             bytes_vector = {bytes_array, bytes_array + sizeof(T_Data)};
 
-            // Needed to remove trailing 0s
-            bytes_vector.erase(
-                std::remove_if(bytes_vector.begin(),
-                               bytes_vector.end(),
-                               [](const std::byte byte) {
-                                   return 0 == std::to_integer<uint8_t>(byte);
-                               }),
-                bytes_vector.end());
-
-            // If bytes_vector is empty then removing trailing 0s has
-            // removed the original value, 0; therefore re-add it.
-            if (bytes_vector.empty())
+            // TODO:: Should this affect floats only? or strings too?
+            if constexpr (std::is_integral<T_Data>::value)
             {
-                bytes_vector.push_back(std::byte{0});
+                // Needed to remove trailing 0s
+                bytes_vector.erase(
+                    std::remove_if(bytes_vector.begin(),
+                                   bytes_vector.end(),
+                                   [](const std::byte byte) {
+                                       return 0 ==
+                                              std::to_integer<uint8_t>(byte);
+                                   }),
+                    bytes_vector.end());
+
+                // If bytes_vector is empty then removing trailing 0s has
+                // removed the original value, 0; therefore re-add it.
+                if (bytes_vector.empty())
+                {
+                    bytes_vector.push_back(std::byte{0});
+                }
             }
         }
         return bytes_vector;
@@ -346,7 +351,7 @@ private:
     template <typename T_cast_output, typename T_cast_input>
     constexpr static T_cast_output safe_cast(T_cast_input p_input)
     {
-        constexpr auto output = static_cast<T_cast_output>(p_input);
+        const auto output = static_cast<T_cast_output>(p_input);
         if (p_input != output)
         {
             throw std::range_error("Casting error. Loss of precision detected. "
@@ -445,7 +450,7 @@ public:
         : m_headers(),
           m_traces(convert_traces_to_bytes(p_traces, sizeof(T_Sample)))
     {
-        const std::uint8_t sample_length = sizeof(T_Traces);
+        constexpr std::uint8_t sample_length = sizeof(T_Sample);
 
         // TODO: Add validation to all constructors to ensure each trace is
         // the same length.
