@@ -45,25 +45,28 @@ This requires **C++17** or later.
 #### Example Usage (C++)
 
 This is the most basic way to use the library at the moment.
+There are multiple other formats of adding traces,
+See the [API Documentation](#api-documentation) for full details.
 ```cpp
-Traces_Serialiser::Serialiser<float> serialiser(number_of_traces,
-                                                samples_per_trace,
-                                                sample_coding,
-                                                traces);
+// Two traces with three samples each.
+Traces_Serialiser::Serialiser serialiser({{1,2,3},{4,5,6}});
 
 serialiser.Save("/file/path/to/save/to");
 ```
-The template parameter refers to the type of the traces. In the above example, `<float>` is used, indicating that the `traces` object is a vector of float values. Any arithmetic type can be used here.
+The Serialiser object can be used as a template like so:
+```cpp
+Traces_Serialiser::Serialiser<float> serialiser(traces);
+
+serialiser.Save("/file/path/to/save/to");
+```
+The template parameter refers to the type of the traces. If not provided, the traces will be stored as `float` values. In the above example, `<float>` is used, indicating that the `traces` object is a vector of float values. Any arithmetic type can be used here.
 
 Adding additional headers is simple as all headers have a custom function
 (at the time of writing). Here is an example of a few of them. A full list is
 available in the [API Documentation.](#api-documentation)
 
 ```cpp
-Traces_Serialiser::Serialiser<uint8_t> serialiser(number_of_traces,
-                                                  samples_per_trace,
-                                                  sample_coding,
-                                                  traces);
+Traces_Serialiser::Serialiser serialiser(traces);
 
 serialiser.Set_Trace_Title("My traces");
 serialiser.Set_Axis_Scale_Y(0.5f);
@@ -75,11 +78,9 @@ serialiser.Save("/file/path/to/save/to");
 Custom headers can also be added through the `Add_Header` method, however this
 is not recommended as it is more error prone.
 ```cpp
-Traces_Serialiser::Serialiser<uint32_t> serialiser(number_of_traces,
-                                                   samples_per_trace,
-                                                   sample_coding, traces);
+Traces_Serialiser::Serialiser serialiser(traces);
 
-serialiser.Add_Header(Traces_Serialiser::Serialiser<uint16_t>::Tag_Trace_Title,
+serialiser.Add_Header(Traces_Serialiser::Serialiser::Tag_Trace_Title,
                       "My traces");
 
 serialiser.Add_Header(0x48, 7);
@@ -108,43 +109,24 @@ import Traces_Serialiser
 Using the python bindings is slightly more complicated than in C++ but it is
 mostly the same.
 ```python
-serialiser = Traces_Serialiser.Serialiser_float(number_of_traces,
-	                                        samples_per_trace,
-	                                        sample_coding,
-                                                traces)
+# Two traces with three samples each.
+serialiser = Traces_Serialiser.Serialiser_float([[1,2,3],[4,5,6]])
 
 serialiser.Save("/file/path/to/save/to")
 ```
-Instead of templates, there are four separate python classes. Serialiser_8, Serialiser_16 and Serialiser_32 should be used to store unsigned 8, 16 and 32 bit values. Serialiser_float should be used to store floating point values.
-
-vector_8, vector_16, vector_32 and vector_float objects are provided as an alternative format for the traces to be in. These are exactly the same as a [C++ vector.](https://en.cppreference.com/w/cpp/container/vector)
-```python
-traces = Traces_Serialiser.vector_8()
-
-# Add the traces to this object however you like.
-traces.push_back(trace)
-...
-
-serialiser = Traces_Serialiser.Serialiser_8(number_of_traces,
-                                            samples_per_trace,
-                                            sample_coding,
-                                            traces)
-
-serialiser.Save("/file/path/to/save/to")
-```
+Instead of templates, there are four separate python classes. Serialiser_8,
+Serialiser_16 and Serialiser_32 should be used to store unsigned 8, 16 and 32
+bit values. Serialiser_float should be used to store floating point values.
 
 Adding additional headers is simple as all headers have a custom function
 (at the time of writing). Here is an example of a few of them. A full list is
 available in the [API Documentation.](#api-documentation)
 
 ```python
-serialiser = Traces_Serialiser.Serialiser_32(number_of_traces,
-                                             samples_per_trace,
-                                             sample_coding,
-                                             traces)
+serialiser = Traces_Serialiser.Serialiser_32(traces)
 
 serialiser.Set_Trace_Title("My traces")
-serialiser.Set_Axis_Scale_Y(0.5f)
+serialiser.Set_Axis_Scale_Y(0.5)
 serialiser.Set_External_Clock_Used()
 
 serialiser.Save("/file/path/to/save/to")
@@ -153,9 +135,7 @@ serialiser.Save("/file/path/to/save/to")
 Custom headers can also be added through the `Add_Header` method, however this
 is not recommended as it is more error prone.
 ```cpp
-serialiser = Traces_Serialiser.Serialiser_16(number_of_traces,
-                                             samples_per_trace,
-                                             sample_coding, traces)
+serialiser = Traces_Serialiser.Serialiser_16(traces)
 
 serialiser.Add_Header(Traces_Serialiser.Serialiser_8.Tag_Trace_Title,
                       "My traces")
@@ -198,34 +178,15 @@ time you compile.
 
 ### Prerequisites
 
-This is compiling using [CMake.](https://cmake.org/) As such, CMake needs to be
+This uses [CMake.](https://cmake.org/) As such, CMake needs to be
 installed first.
 
 #### Linux
 
 The recommended way of installing CMake is through your package manager.
 
-Other distributions may have packages available. If a CMake package isn't
-available on your Linux distribution follow the
+If a CMake package isn't available on your Linux distribution follow the
 [official CMake install instructions.](https://cmake.org/install/)
-
-##### APT (Ubuntu/Linux Mint/Debian)
-
-```
-sudo apt install cmake
-```
-
-##### YUM (Fedora/CentOS/RHEL)
-
-```
-sudo yum install cmake
-```
-
-##### Pacman (Arch)
-
-```
-sudo pacman -S cmake
-```
 
 #### MacOS
 
@@ -299,7 +260,7 @@ cmake --build . --target tests
 In order to generate code coverage information, [Gcovr](https://gcovr.com/) is
 required.
 
-1) **Regenerate the build files** using the option shown below from the build
+1) **Regenerate the build files** using the option [shown below](#traces-serialiser_calculate_coverage) from the build
 directory. This is needed as specific compile flags need to be added in order to
 generate coverage information.
 ```
@@ -338,6 +299,12 @@ respective sources when building. Currently this is only used for the
 
 ### Traces-Serialiser_CALCULATE_COVERAGE
 
+This is needed to generate code coverage information.
+See [Coverage information](#coverage-information) for details on how to do this.
+
+**Warning: This will enable compile flags that are not recommended for normal
+purposes. Set this to OFF after you are done generating coverage information.**
+
 ## Built with
 
 - C++
@@ -347,7 +314,7 @@ respective sources when building. Currently this is only used for the
 - [Doxygen](https://www.stack.nl/~dimitri/doxygen)
 - [SWIG](http://www.swig.org/)
 - [markdown-toc](https://github.com/Ecotrust-Canada/markdown-toc)
-- [Text to ASCII Art Generator](http://patorjk.com/software/taag/#f=ANSI Shadow)
+- [Text to ASCII Art Generator](http://patorjk.com/software/taag/#f=ANSI%20Shadow)
 
 ## License
 This program is released under license AGPLv3+.
