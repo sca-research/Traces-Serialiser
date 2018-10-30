@@ -108,6 +108,8 @@ private:
         if constexpr (std::is_same<T_Data, std::string>::value)
         {
             // Get a char array from the string and cast it to a byte array
+            // TODO: std::string is a container. Treat it as such using
+            // convert_traces_to_bytes() instead of separate handling here.
             auto bytes_array =
                 reinterpret_cast<const std::byte*>(p_data.c_str());
 
@@ -243,8 +245,6 @@ private:
             // If the traces are floating point values, set bit 5 to indicate
             // this as per the Riscure inspector specification: Table K.2.
             // Sample coding.
-            // TODO: Find out what the sample length should be for floats
-            // TODO: Ensure floats are saved correctly.
             if constexpr (std::is_floating_point<T_Sample>::value)
             {
                 return p_sample_length | 0b10000;
@@ -454,8 +454,6 @@ public:
 
         // TODO: Add validation to all constructors to ensure each trace is
         // the same length.
-        // TODO: Add validation to ensure that sample_length * number of
-        // traces * samples_per_trace = p_traces.size()
 
         const std::uint32_t samples_per_trace =
             safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces);
@@ -473,7 +471,7 @@ public:
     //! samples.
     //! @param p_sample_length The length of a trace sample in bytes. This can
     //! optionally be specified. If not specified then it is assumed to be the
-    //! size of the data type samples are stored as.
+    //! size of the data type samples are stored as, given by T_Sample.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
@@ -538,6 +536,9 @@ public:
                                          "the file to be written to");
         }
 
+        // TODO: If all of the samples are smaller than the sample length then
+        // the sample length can be reduced, saving a lot of file size.
+
         // Output each header
         for (const auto& header : m_headers)
         {
@@ -571,12 +572,15 @@ public:
     // The default parameters in the following functions are copied from the
     // Riscure inspector documentation.
 
+    // TODO: Implement this.
     // TODO: Rename
+    // https://wandbox.org/permlink/TiG2k4xzQUojzfdO
     void Set_Cryptographic_Data_Length(const std::uint16_t p_length = 0)
     {
         Add_Header(Tag_Length_Of_Cryptographic_Data, p_length);
     }
 
+    // TODO: Implement this.
     void Set_Title_Space_Per_Trace(const std::uint8_t p_length = 0)
     {
         Add_Header(Tag_Title_Space_Per_Trace, p_length);
@@ -622,6 +626,8 @@ public:
         Add_Header(Tag_Trace_Offset, p_offset);
     }
 
+    // TODO: Calling this with a float argument works. Validate to ensure that
+    // this does not work.
     void Set_Logarithmic_Scale(const std::uint8_t p_scale = 0)
     {
         Add_Header(Tag_Logarithmic_Scale, p_scale);
