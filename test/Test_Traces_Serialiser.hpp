@@ -411,7 +411,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set scale value for X axis")
     {
-        serialiser.Set_Axis_Scale_X(1.1);
+        serialiser.Set_Axis_Scale_X(1.1f);
 
         serialiser.Save(file_path);
 
@@ -450,7 +450,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set scale value for Y axis")
     {
-        serialiser.Set_Axis_Scale_Y(0.1);
+        serialiser.Set_Axis_Scale_Y(0.1f);
 
         serialiser.Save(file_path);
 
@@ -567,7 +567,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set scope range")
     {
-        serialiser.Set_Scope_Range(1.1);
+        serialiser.Set_Scope_Range(1.1f);
 
         serialiser.Save(file_path);
 
@@ -645,7 +645,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set scope offset")
     {
-        serialiser.Set_Scope_Offset(1.1);
+        serialiser.Set_Scope_Offset(1.1f);
 
         serialiser.Save(file_path);
 
@@ -684,7 +684,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set scope input impedance")
     {
-        serialiser.Set_Scope_Input_Impedance(1.1);
+        serialiser.Set_Scope_Input_Impedance(1.1f);
 
         serialiser.Save(file_path);
 
@@ -802,7 +802,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set filter frequency")
     {
-        serialiser.Set_Filter_Frequency(1.1);
+        serialiser.Set_Filter_Frequency(1.1f);
 
         serialiser.Save(file_path);
 
@@ -841,7 +841,7 @@ TEST_CASE("Saving headers"
 
     SECTION("Set filter range")
     {
-        serialiser.Set_Filter_Range(1.1);
+        serialiser.Set_Filter_Range(1.1f);
 
         serialiser.Save(file_path);
 
@@ -1099,7 +1099,7 @@ TEST_CASE("Saving headers"
         REQUIRE_NOTHROW(serialiser.Set_External_Clock_Used(false));
 
         REQUIRE_THROWS_WITH(
-            serialiser.Set_External_Clock_Frequency(3.4),
+            serialiser.Set_External_Clock_Frequency(3.4f),
             Catch::Matchers::Contains("Enable external clock explicitly with "
                                       "Set_External_Clock_Used()"));
     }
@@ -1107,7 +1107,7 @@ TEST_CASE("Saving headers"
     SECTION("Set External clock frequency without setting external clock used")
     {
         REQUIRE_THROWS_WITH(
-            serialiser.Set_External_Clock_Frequency(3.4),
+            serialiser.Set_External_Clock_Frequency(3.4f),
             Catch::Matchers::Contains("Enable external clock explicitly with "
                                       "Set_External_Clock_Used()"));
     }

@@ -23,9 +23,6 @@
  *  @copyright GNU Affero General Public License Version 3+
  */
 
-#ifndef TESTS_TESTS_HPP
-#define TESTS_TESTS_HPP
-
 //! Required when using Catch testing framework
 //! @see https://github.com/catchorg/Catch2
 #ifndef CATCH_CONFIG_MAIN
@@ -58,5 +55,3 @@ const std::string load_file(const std::string& p_file_path)
 #include "Test_Traces_Types.hpp"
 #include "Test_Traces_Serialiser.hpp"
 // clang-format on
-
-#endif  // TESTS_TESTS_HPP
