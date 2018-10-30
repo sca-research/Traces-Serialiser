@@ -180,4 +180,40 @@ TEST_CASE("Traces of different types"
                             expected_result,
                             actual_result.size()));
     }
+
+    SECTION("Default to float traces")
+    {
+        // Create some traces and serialise them to a trs file.
+        Traces_Serialiser::Serialiser serialiser({{1, 2, 3}, {4, 5, 6}});
+        serialiser.Save(file_path);
+
+        // Load the trs file into a string
+        const std::string actual_result = load_file(file_path);
+
+        // clang-format off
+        constexpr static std::uint8_t expected_result[] = {
+            0x41,  // Number of traces
+            0x01,  // Length
+            0x02,  // Value
+            0x42,  // Number of Samples per Trace
+            0x01,  // Length
+            0x03,  // Value
+            0x43,  // Sample Coding
+            0x01,  // Length
+            0x14,  // Value
+            0x5f,  // Trace Block Marker
+            0x00,  // Length (Always 0)
+            0x00, 0x00, 0x80, 0x3f,  // Start of trace 1
+            0x00, 0x00, 0x00, 0x40,
+            0x00, 0x00, 0x40, 0x40,
+            0x00, 0x00, 0x80, 0x40,  // Start of trace 2
+            0x00, 0x00, 0xa0, 0x40,
+            0x00, 0x00, 0xc0, 0x40,};
+        // clang-format on
+
+        // Ensure that the actual result is the same as the expected result.
+        REQUIRE(0 == memcmp(actual_result.c_str(),
+                            expected_result,
+                            actual_result.size()));
+    }
 }

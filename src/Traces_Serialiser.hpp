@@ -66,7 +66,7 @@ namespace Traces_Serialiser
 //! Currently it supports saving in the format used by Riscure's inspector
 //! tool.
 //! @see https://www.riscure.com/security-tools/inspector-sca/
-template <typename T_Sample> class Serialiser
+template <typename T_Sample = float> class Serialiser
 {
     // Ensure that the template type T_Sample is arithmetic.
     static_assert(std::is_arithmetic<T_Sample>::value,
