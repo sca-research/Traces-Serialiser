@@ -79,9 +79,10 @@ private:
     //! @see https://en.wikipedia.org/wiki/Type-length-value
     //! In this data structure, the headers are indexed by their type in a
     //! map. The map then contains a pair, which corresponds to the length
-    //! and the value. The tag and length are stored as a byte.
-    //! The value is stored as one or more bytes (std::vector<std::byte>).
-    std::map<std::uint8_t, std::pair<std::uint8_t, std::vector<std::byte>>>
+    //! and the value. The tag and length are stored as one or more bytes
+    //! (std::vector<std::byte>).
+    std::map<std::uint8_t,
+             std::pair<std::vector<std::byte>, std::vector<std::byte>>>
         m_headers;
 
     //! This contains the actual side channel analysis traces, stored as
@@ -512,8 +513,22 @@ public:
         // A temporary variable to convert p_data to bytes.
         const std::vector<std::byte> value = convert_to_bytes(p_data);
 
+        std::vector<std::byte> length = convert_to_bytes(value.size());
+
+        // If the length doesn't fit into 7 bits then the 8th bit is set
+        // indicating that more than one byte is used to store the length and
+        // that the first byte is the length of the length.
+        if (0b01111111 < value.size())
+        {
+            // TODO: If the length is longer than 65025 bytes (65KB) then the
+            // resulting file will be incorrect. Does this need to be accounted
+            // for?
+            length.insert(length.begin(),
+                          std::byte(0b10000000 | length.size()));
+        }
+
         // Add it to the map of headers.
-        m_headers[p_tag] = std::make_pair(value.size(), value);
+        m_headers[p_tag] = std::make_pair(length, value);
     }
 
     //! @brief This saves the current state of the headers, along with the
@@ -542,13 +557,19 @@ public:
         // Output each header
         for (const auto& header : m_headers)
         {
-            // Output tag and length
-            output_file << header.first << header.second.first;
+            // Output tag
+            output_file << header.first;
+
+            // Output length
+            for (const auto& length_byte : header.second.first)
+            {
+                output_file << std::to_integer<uint8_t>(length_byte);
+            }
 
             // Output value
-            for (const auto& value : header.second.second)
+            for (const auto& value_byte : header.second.second)
             {
-                output_file << std::to_integer<uint8_t>(value);
+                output_file << std::to_integer<uint8_t>(value_byte);
             }
         }
 
