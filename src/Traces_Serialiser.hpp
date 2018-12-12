@@ -226,16 +226,12 @@ private:
     //! @param p_number_of_traces The total number of traces.
     //! @param p_samples_per_trace The number of samples within each trace.
     //! @param p_sample_length The length of a single sample in bytes.
-    //! @exception std::range_error If the sample length is an invalid value
-    //! then this exception will be thrown.
     void add_required_headers(const std::uint32_t p_number_of_traces,
                               const std::uint32_t p_samples_per_trace,
                               const std::uint8_t p_sample_length)
     {
-        if (4 < p_sample_length || 3 == p_sample_length)
-        {
-            throw std::range_error("Sample length must be either 1, 2 or 4");
-        }
+        validate_required_headers(
+            p_number_of_traces, p_samples_per_trace, p_sample_length);
 
         Add_Header(Tag_Number_Of_Traces, p_number_of_traces);
         Add_Header(Tag_Number_Of_Samples_Per_Trace, p_samples_per_trace);
@@ -260,6 +256,38 @@ private:
         ();
 
         Add_Header(Tag_Sample_Coding, sample_coding);
+    }
+
+    //! @brief Ensures that all of the required headers are valid. This does not
+    //! return anything as an exception will be thrown if the validation fails.
+    //! Checks that the sample length is 1, 2 or 4 bytes.
+    //! Checks that the headers indicating the various lengths and sizes are
+    //! correct by checking the amount of traces provided
+    //! @param p_number_of_traces The total number of traces.
+    //! @param p_samples_per_trace The number of samples within each trace.
+    //! @param p_sample_length The length of a single sample in bytes.
+    //! @exception std::range_error If the sample length is an invalid value
+    //! then this exception will be thrown.
+    //! @exception std::domain_error If the sizes and lengths do not match what
+    //! is in m_traces then this is thrown.
+    constexpr void
+    validate_required_headers(const std::uint32_t p_number_of_traces,
+                              const std::uint32_t p_samples_per_trace,
+                              const std::uint8_t p_sample_length)
+    {
+        if (4 < p_sample_length || 3 == p_sample_length)
+        {
+            throw std::range_error("Sample length must be either 1, 2 or 4");
+        }
+
+        if (p_number_of_traces * p_samples_per_trace * p_sample_length !=
+            m_traces.size())
+        {
+            throw std::domain_error(
+                "Invalid parameters given. Either he number of traces, "
+                "number of samples per trace or the sample length is "
+                "incorrect.");
+        }
     }
 
     //! @brief Checks if each of the traces within p_traces are of the same

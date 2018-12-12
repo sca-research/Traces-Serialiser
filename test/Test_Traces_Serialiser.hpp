@@ -34,7 +34,7 @@ TEST_CASE("Adding headers"
           "[!throws][headers]")
 {
     std::vector<std::uint8_t> traces = {0, 1, 2, 3, 4, 5};
-    Traces_Serialiser::Serialiser<std::uint8_t> serialiser(traces, 4, 1, 2);
+    Traces_Serialiser::Serialiser<std::uint8_t> serialiser(traces, 1, 6, 2);
 
     SECTION("Set Cryptographic Data Length")
     {

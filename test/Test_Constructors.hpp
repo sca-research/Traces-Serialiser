@@ -44,8 +44,8 @@ TEST_CASE("Adding traces"
         REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
             {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
              12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
-            2400,
             1,
+            24,
             0x02));
     }
 
@@ -59,7 +59,7 @@ TEST_CASE("Adding traces"
     SECTION("Float traces")
     {
         REQUIRE_NOTHROW(
-            Traces_Serialiser::Serialiser<float>({0.22548f, 0.001f}, 1, 2, 2));
+            Traces_Serialiser::Serialiser<float>({0.22548f, 0.001f}, 1, 2, 4));
     }
 
     // TODO: Work out how to add this test. The expected result is that
