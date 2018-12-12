@@ -1430,10 +1430,34 @@ TEST_CASE("Saving headers"
                 "Set_External_Clock_Resampler_Enabled()"));
     }
 
-    SECTION("Different length traces")
+    SECTION("Different length traces - 2 traces")
     {
         REQUIRE_THROWS_WITH(
             Traces_Serialiser::Serialiser({{1, 2, 3}, {4, 5}}),
+            Catch::Matchers::Contains("Traces must all contain the same number "
+                                      "of samples in a TRS file."));
+    }
+
+    SECTION("Different length traces - 3 traces")
+    {
+        REQUIRE_THROWS_WITH(
+            Traces_Serialiser::Serialiser({{1, 2, 3}, {4, 5, 6}, {7}}),
+            Catch::Matchers::Contains("Traces must all contain the same number "
+                                      "of samples in a TRS file."));
+    }
+
+    SECTION("Different length traces - 4 traces")
+    {
+        REQUIRE_THROWS_WITH(
+            Traces_Serialiser::Serialiser({{1}, {2}, {3, 4}, {5}}),
+            Catch::Matchers::Contains("Traces must all contain the same number "
+                                      "of samples in a TRS file."));
+    }
+
+    SECTION("Different length traces - blank trace")
+    {
+        REQUIRE_THROWS_WITH(
+            Traces_Serialiser::Serialiser({{1, 2, 3}, {}, {4, 5, 6}}),
             Catch::Matchers::Contains("Traces must all contain the same number "
                                       "of samples in a TRS file."));
     }

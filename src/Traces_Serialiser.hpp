@@ -284,7 +284,7 @@ private:
             m_traces.size())
         {
             throw std::domain_error(
-                "Invalid parameters given. Either he number of traces, "
+                "Invalid parameters given. Either the number of traces, "
                 "number of samples per trace or the sample length is "
                 "incorrect.");
         }
@@ -300,13 +300,18 @@ private:
     static constexpr void
     validate_traces_length(const std::vector<T_Traces>& p_traces)
     {
-        // If everything in p_traces is of the same length
+        // If everything in p_traces is not the same length
+        //
+        // Finds the first occurrence of two adjacent traces that don't have the
+        // same size. If this is the end of the vector then none were found and
+        // they are all the same size.
         if (std::adjacent_find(
                 std::begin(p_traces),
                 std::end(p_traces),
                 [](const T_Traces& p_trace_1, const T_Traces& p_trace_2) {
-                    return p_trace_1.size() == p_trace_2.size();
-                }) == std::end(p_traces))
+                    // Check if these two traces are the same size.
+                    return p_trace_1.size() != p_trace_2.size();
+                }) != std::end(p_traces))
         {
             throw std::domain_error("Traces must all contain the same "
                                     "number of samples in a TRS file.");
