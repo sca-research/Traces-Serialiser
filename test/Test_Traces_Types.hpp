@@ -26,6 +26,7 @@
 #include <cstdint>  // for uint8_t, uint16_t, uint32_t
 #include <cstring>  // for memcmp
 #include <memory>   // for unique_ptr, make_unique
+#include <string>   // for string
 
 #include <catch.hpp>  // for Section, StringRef, SECTION, Sectio...
 
@@ -172,7 +173,7 @@ TEST_CASE("Traces of different types"
             0x00, 0x00, 0x40, 0x40,
             0x00, 0x00, 0x80, 0x40,  // Start of trace 2
             0x00, 0x00, 0xa0, 0x40,
-            0x00, 0x00, 0xc0, 0x40,};
+            0x00, 0x00, 0xc0, 0x40};
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
@@ -208,7 +209,7 @@ TEST_CASE("Traces of different types"
             0x00, 0x00, 0x40, 0x40,
             0x00, 0x00, 0x80, 0x40,  // Start of trace 2
             0x00, 0x00, 0xa0, 0x40,
-            0x00, 0x00, 0xc0, 0x40,};
+            0x00, 0x00, 0xc0, 0x40};
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
