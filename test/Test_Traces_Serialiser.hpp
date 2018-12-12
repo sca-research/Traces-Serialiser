@@ -1430,6 +1430,14 @@ TEST_CASE("Saving headers"
                 "Set_External_Clock_Resampler_Enabled()"));
     }
 
+    SECTION("Different length traces")
+    {
+        REQUIRE_THROWS_WITH(
+            Traces_Serialiser::Serialiser({{1, 2, 3}, {4, 5}}),
+            Catch::Matchers::Contains("Traces must all contain the same number "
+                                      "of samples in a TRS file."));
+    }
+
     SECTION("Set extra long header (> 7 bits length)")
     {
         serialiser.Set_Trace_Description(

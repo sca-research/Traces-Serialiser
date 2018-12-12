@@ -196,6 +196,9 @@ private:
                 if constexpr (!std::is_same<std::vector<T_Traces>,
                                             std::vector<T_Sample>>::value)
                 {
+                    // Check that each sub container is of the same length
+                    validate_traces_length(p_data);
+
                     return convert_traces_to_bytes(data, p_sample_length);
                 }
                 // if this is not a nested container simply convert
@@ -257,6 +260,29 @@ private:
         ();
 
         Add_Header(Tag_Sample_Coding, sample_coding);
+    }
+
+    //! @brief Checks if each of the traces within p_traces are of the same
+    //! length. This does not return anything as an exception will be thrown if
+    //! the validation fails.
+    //! @param p_traces The traces to be checked
+    //! @exception std::domain_error If the traces do not all contain the same
+    //! amount of samples then this exception is thrown.
+    template <typename T_Traces>
+    static constexpr void
+    validate_traces_length(const std::vector<T_Traces>& p_traces)
+    {
+        // If everything in p_traces is of the same length
+        if (std::adjacent_find(
+                std::begin(p_traces),
+                std::end(p_traces),
+                [](const T_Traces& p_trace_1, const T_Traces& p_trace_2) {
+                    return p_trace_1.size() == p_trace_2.size();
+                }) == std::end(p_traces))
+        {
+            throw std::domain_error("Traces must all contain the same "
+                                    "number of samples in a TRS file.");
+        }
     }
 
     //! @brief Ensures that setting the header given by the parameter p_tag
