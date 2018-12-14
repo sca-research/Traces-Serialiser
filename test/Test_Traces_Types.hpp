@@ -24,9 +24,8 @@
  */
 
 #include <cstdint>  // for uint8_t, uint16_t, uint32_t
-#include <cstring>  // for memcmp
-#include <memory>   // for unique_ptr, make_unique
 #include <string>   // for string
+#include <vector>   // for vector
 
 #include <catch.hpp>  // for Section, StringRef, SECTION, Sectio...
 
@@ -47,7 +46,7 @@ TEST_CASE("Traces of different types"
         // Load the trs file into a string
         const std::string actual_result = load_file(file_path);
 
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -67,9 +66,8 @@ TEST_CASE("Traces of different types"
             0x06};
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("16 bit traces")
@@ -83,7 +81,7 @@ TEST_CASE("Traces of different types"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -103,10 +101,9 @@ TEST_CASE("Traces of different types"
             0x00, 0x06};
         // clang-format on
 
-        // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        // Ensure that the actual result is the same as the expected result
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("32 bit traces")
@@ -120,7 +117,7 @@ TEST_CASE("Traces of different types"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -140,10 +137,9 @@ TEST_CASE("Traces of different types"
             0x00, 0x00, 0x00, 0x06};
         // clang-format on
 
-        // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        // Ensure that the actual result is the same as the expected result
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("float traces")
@@ -156,7 +152,7 @@ TEST_CASE("Traces of different types"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -176,10 +172,9 @@ TEST_CASE("Traces of different types"
             0x00, 0x00, 0xc0, 0x40};
         // clang-format on
 
-        // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        // Ensure that the actual result is the same as the expected result
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Default to float traces")
@@ -192,7 +187,7 @@ TEST_CASE("Traces of different types"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -211,10 +206,10 @@ TEST_CASE("Traces of different types"
             0x00, 0x00, 0xa0, 0x40,
             0x00, 0x00, 0xc0, 0x40};
         // clang-format on
+        // const std::string expected_result(expected_result_array);
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 }

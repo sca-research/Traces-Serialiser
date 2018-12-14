@@ -68,7 +68,7 @@ TEST_CASE("Saving traces"
         // Load the trs file into a string
         const std::string actual_result = load_file(file_path);
 
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -88,9 +88,8 @@ TEST_CASE("Saving traces"
             0x06};
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
     SECTION("16 bit traces")
     {
@@ -103,7 +102,7 @@ TEST_CASE("Saving traces"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -124,9 +123,8 @@ TEST_CASE("Saving traces"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
     SECTION("32 bit traces")
     {
@@ -139,7 +137,7 @@ TEST_CASE("Saving traces"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -160,9 +158,8 @@ TEST_CASE("Saving traces"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
     SECTION("float traces")
     {
@@ -174,7 +171,7 @@ TEST_CASE("Saving traces"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -195,9 +192,8 @@ TEST_CASE("Saving traces"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 }
 
@@ -220,7 +216,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -245,9 +241,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set description")
@@ -260,7 +255,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -285,9 +280,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set offset in X axis")
@@ -300,7 +294,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -324,9 +318,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set label of X axis")
@@ -339,7 +332,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -364,9 +357,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set label of Y axis")
@@ -379,7 +371,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -404,9 +396,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scale value for X axis")
@@ -419,7 +410,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -443,9 +434,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scale value for Y axis")
@@ -458,7 +448,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -482,9 +472,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set trace offset for displaying numbers")
@@ -497,7 +486,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -521,9 +510,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set logarithmic scale")
@@ -536,7 +524,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -560,9 +548,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scope range")
@@ -575,7 +562,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -599,9 +586,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scope coupling")
@@ -614,7 +600,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -638,9 +624,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scope offset")
@@ -653,7 +638,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -677,9 +662,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scope input impedance")
@@ -692,7 +676,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -716,9 +700,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set scope ID")
@@ -731,7 +714,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -756,9 +739,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set filter type")
@@ -771,7 +753,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -795,9 +777,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set filter frequency")
@@ -810,7 +791,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -834,9 +815,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set filter range")
@@ -849,7 +829,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -873,9 +853,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock used - implicit true")
@@ -888,7 +867,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -912,9 +891,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock used - explicit true")
@@ -927,7 +905,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -951,9 +929,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock used - explicit false")
@@ -966,7 +943,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -990,9 +967,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock threshold after setting external clock used "
@@ -1144,7 +1120,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1171,9 +1147,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock multiplier after setting external clock used "
@@ -1189,7 +1164,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1216,9 +1191,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock phase shift after setting external clock used "
@@ -1234,7 +1208,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1261,9 +1235,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock frequency after setting external clock used "
@@ -1279,7 +1252,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1306,9 +1279,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock time base after setting external clock used "
@@ -1324,7 +1296,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1351,9 +1323,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock resampler mask after setting external clock "
@@ -1370,7 +1341,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1400,9 +1371,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     SECTION("Set External clock resampler mask after setting external clock "
@@ -1474,7 +1444,7 @@ TEST_CASE("Saving headers"
         const std::string actual_result = load_file(file_path);
 
         // clang-format off
-        constexpr static std::uint8_t expected_result[] = {
+        const std::vector<std::uint8_t> expected_result = {
             0x41,  // Number of traces
             0x01,  // Length
             0x02,  // Value
@@ -1510,9 +1480,8 @@ TEST_CASE("Saving headers"
         // clang-format on
 
         // Ensure that the actual result is the same as the expected result.
-        REQUIRE(0 == memcmp(actual_result.c_str(),
-                            expected_result,
-                            actual_result.size()));
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
     }
 
     // TODO: Check the sample length is correctly detected for every
