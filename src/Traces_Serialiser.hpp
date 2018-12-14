@@ -85,12 +85,16 @@ private:
              std::pair<std::vector<std::byte>, std::vector<std::byte>>>
         m_headers;
 
+    //! @todo Document
+    const std::uint32_t m_number_of_traces;
+    const std::uint32_t m_samples_per_trace;
+    const std::uint8_t m_sample_length;
+
     //! This contains the actual side channel analysis traces, stored as
     //! bytes ready to be saved into the output file.
     //! @todo Don't store a traces object. This is simply the value to the
     //! Tag_Trace_Block_Marker.
-    //! @todo Change this to std:byte:
-    std::vector<std::byte> m_traces;
+    std::vector<std::vector<T_Sample>> m_traces;
 
     //! @brief Converts the data given by the parameter p_data into a series
     //! of bytes.
@@ -187,7 +191,7 @@ private:
     {
         std::vector<std::byte> bytes_vector;
 
-        // for each value in the vector
+        // For each value in the vector
         for (const auto& data : p_data)
         {
             const std::vector<std::byte> data_vector = [&]() {
@@ -215,14 +219,14 @@ private:
         return bytes_vector;
     }
 
-    //! @brief A helper function to add all of the headers required to be in a
-    //! trace file. The headers currently required are the number of traces, the
-    //! number of samples per trace and the sample coding. The sample coding is
-    //! not required as an input here as it can be calculated based off of the
-    //! length of one sample.
-    //! @note Although Tag_Trace_Block_Marker (0x5F) is a required header, it is
-    //! not included here as it needs to be the last header printed before the
-    //! traces.
+    //! @brief A helper function to add all of the headers required to be in
+    //! a trace file. The headers currently required are the number of
+    //! traces, the number of samples per trace and the sample coding. The
+    //! sample coding is not required as an input here as it can be
+    //! calculated based off of the length of one sample.
+    //! @note Although Tag_Trace_Block_Marker (0x5F) is a required header,
+    //! it is not included here as it needs to be the last header printed
+    //! before the traces.
     //! @param p_number_of_traces The total number of traces.
     //! @param p_samples_per_trace The number of samples within each trace.
     //! @param p_sample_length The length of a single sample in bytes.
@@ -480,15 +484,14 @@ public:
                const std::uint32_t p_number_of_traces,
                const std::uint32_t p_samples_per_trace,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers(),
-          m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
+        : m_headers(), m_number_of_traces(p_number_of_traces),
+          m_samples_per_trace(p_samples_per_trace),
+          m_sample_length(p_sample_length),
+          m_traces(split_into_traces(p_traces, m_samples_per_trace))
     {
-        // TODO: Add validation to ensure that sample_length * number of
-        // traces * samples_per_trace = p_traces.size()
-        // TODO: Add more validation to sample length. x8 cannot be longer than
-        // sizeof(T_Sample)
-        add_required_headers(
-            p_number_of_traces, p_samples_per_trace, p_sample_length);
+        // TODO: Add more validation to sample length. x8 cannot be longer
+        // than sizeof(T_Sample)
+        validate_traces_length(m_traces);
     }
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
@@ -496,6 +499,23 @@ public:
     //! This constructor requires the number of traces to be set as a
     //! parameter. Optional headers can be set later. All traces are
     //! required to be passed to the constructor as well.
+    //! @todo: Document
+    static decltype(m_traces)
+    split_into_traces(const std::vector<T_Sample>& p_traces,
+                      const std::uint32_t p_samples_per_trace)
+    {
+        decltype(m_traces) chunked;
+
+        for (std::size_t i = 0, size = p_traces.size(); i < size; ++i)
+        {
+            const auto first =
+                std::begin(p_traces) + static_cast<std::int8_t>(i);
+            const auto last = first + p_samples_per_trace;
+            chunked.emplace_back(std::vector<T_Sample>(first, last));
+        }
+        return chunked;
+    }
+
     //! @param p_number_of_traces The number of traces to be saved.
     //! @param p_traces All of the traces as stored as a vector of samples.
     //! @note The length of one sample is not specified, it is assumed to be
@@ -507,19 +527,13 @@ public:
     // trace.
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces)
-        : m_headers(),
-          m_traces(convert_traces_to_bytes(p_traces, sizeof(T_Sample)))
+        : m_headers(), m_number_of_traces(p_number_of_traces),
+          m_samples_per_trace(
+              safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces)),
+          m_sample_length(sizeof(T_Sample)),
+          m_traces(split_into_traces(p_traces, m_samples_per_trace))
     {
-        constexpr std::uint8_t sample_length = sizeof(T_Sample);
-
-        // TODO: Add validation to all constructors to ensure each trace is
-        // the same length.
-
-        const std::uint32_t samples_per_trace =
-            safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces);
-
-        add_required_headers(
-            p_number_of_traces, samples_per_trace, sample_length);
+        validate_traces_length(m_traces);
     }
 
     //! @brief Constructs the Serialiser object and adds all of the mandatory
@@ -537,19 +551,16 @@ public:
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
         : m_headers(),
-          m_traces(convert_traces_to_bytes(p_traces, p_sample_length))
+          m_number_of_traces(safe_cast<std::uint32_t>(p_traces.size())),
+          // Number of samples per trace can be assumed to be the length of
+          // one trace.
+          // TODO: This doesn't work if there is extra cryptographic data in
+          // p_traces.
+          m_samples_per_trace(
+              safe_cast<std::uint32_t>(p_traces.front().size())),
+          m_sample_length(p_sample_length), m_traces(p_traces)
     {
-        // Number of samples per trace can be assumed to be the length of
-        // one trace.
-        // TODO: This doesn't work if there is extra cryptographic data in
-        // p_traces.
-        const std::uint32_t samples_per_trace =
-            safe_cast<std::uint32_t>(p_traces.front().size());
-
-        // TODO: Verify that each of the traces are the same size.
-        add_required_headers(safe_cast<std::uint32_t>(p_traces.size()),
-                             samples_per_trace,
-                             p_sample_length);
+        validate_traces_length(m_traces);
     }
 
     //! @brief This is this function that adds headers to the list of
@@ -599,8 +610,11 @@ public:
     //! @exception std::ios_base::failure Throws an exception if creating
     //! the output stream fails for any reason. For example, directory
     //! doesn't exist.
-    void Save(const std::string& p_file_path) const
+    void Save(const std::string& p_file_path)
     {
+        add_required_headers(
+            m_number_of_traces, m_samples_per_trace, m_sample_length);
+
         std::ofstream output_file(p_file_path,
                                   std::ios::out | std::ios::binary);
 
@@ -641,8 +655,10 @@ public:
         output_file.put(0x00);
 
         for (const auto& trace : m_traces)
+        for (const auto& sample :
+             this->convert_traces_to_bytes(m_traces, m_sample_length))
         {
-            output_file << std::to_integer<uint8_t>(trace);
+            output_file << std::to_integer<uint8_t>(sample);
         }
         output_file.close();
     }
