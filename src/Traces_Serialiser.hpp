@@ -284,8 +284,8 @@ private:
             throw std::range_error("Sample length must be either 1, 2 or 4");
         }
 
-        if (p_number_of_traces * p_samples_per_trace * p_sample_length !=
-            m_traces.size())
+        if (p_number_of_traces * p_samples_per_trace !=
+            m_traces.size() * m_traces.front().size())
         {
             throw std::domain_error(
                 "Invalid parameters given. Either the number of traces, "
