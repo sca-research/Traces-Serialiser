@@ -23,7 +23,8 @@
  *  @copyright GNU Affero General Public License Version 3+
  */
 
-//! Required when using Catch testing framework
+//! Required when using Catch testing framework - Tells Catch to provide a
+//! main()
 //! @see https://github.com/catchorg/Catch2
 #ifndef CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_MAIN
@@ -45,13 +46,14 @@ const std::string load_file(const std::string& p_file_path)
 {
     std::ifstream file(p_file_path, std::ios::binary);
     std::string actual_result;
-    file >> actual_result;
+
+    // TRS files should only ever be one line
+    std::getline(file, actual_result);
+
     return actual_result;
 }
 
 // The actual tests
-// clang-format off
 #include "Test_Constructors.hpp"
 #include "Test_Traces_Serialiser.hpp"
 #include "Test_Traces_Types.hpp"
-// clang-format on
