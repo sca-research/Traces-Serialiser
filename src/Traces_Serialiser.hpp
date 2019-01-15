@@ -90,6 +90,8 @@ private:
     const std::uint32_t m_samples_per_trace;
     const std::uint8_t m_sample_length;
 
+    const std::vector<std::string> m_extra_data;
+
     //! This contains the actual side channel analysis traces, stored as
     //! bytes ready to be saved into the output file.
     //! @todo Don't store a traces object. This is simply the value to the
@@ -304,22 +306,27 @@ private:
     static constexpr void
     validate_traces_length(const std::vector<T_Traces>& p_traces)
     {
-        // If everything in p_traces is not the same length
-        //
-        // Finds the first occurrence of two adjacent traces that don't have the
-        // same size. If this is the end of the vector then none were found and
-        // they are all the same size.
-        if (std::adjacent_find(
-                std::begin(p_traces),
-                std::end(p_traces),
-                [](const T_Traces& p_trace_1, const T_Traces& p_trace_2) {
-                    // Check if these two traces are the same size.
-                    return p_trace_1.size() != p_trace_2.size();
-                }) != std::end(p_traces))
+        if (!check_all_same_length(p_traces))
         {
             throw std::domain_error("Traces must all contain the same "
                                     "number of samples in a TRS file.");
         }
+    }
+
+    template <typename T>
+    static constexpr bool check_all_same_length(const std::vector<T> p_data)
+    {
+        // If everything in p_data is not the same length
+        //
+        // Finds the first occurrence of two adjacent data points that don't
+        // have the same size. If this is the end of the vector then none were
+        // found and they are all the same size.
+        return std::adjacent_find(std::begin(p_data),
+                                  std::end(p_data),
+                                  [](const T& p_data_1, const T& p_data_2) {
+                                      // Check if these two are the same size.
+                                      return p_data_1.size() != p_data_2.size();
+                                  }) == std::end(p_data);
     }
 
     //! @brief Ensures that setting the header given by the parameter p_tag
@@ -511,6 +518,7 @@ public:
             const auto first =
                 std::begin(p_traces) + static_cast<std::int8_t>(i);
             const auto last = first + p_samples_per_trace;
+
             chunked.emplace_back(std::vector<T_Sample>(first, last));
         }
         return chunked;
@@ -561,6 +569,27 @@ public:
           m_sample_length(p_sample_length), m_traces(p_traces)
     {
         validate_traces_length(m_traces);
+    }
+
+    Serialiser(const std::vector<std::string>& p_extra_data,
+               const std::vector<std::vector<T_Sample>>& p_traces,
+               const std::uint8_t p_sample_length = sizeof(T_Sample))
+        : m_headers(),
+          m_number_of_traces(safe_cast<std::uint32_t>(p_traces.size())),
+          // Number of samples per trace can be assumed to be the length of
+          // one trace.
+          m_samples_per_trace(
+              safe_cast<std::uint32_t>(p_traces.front().size())),
+          m_sample_length(p_sample_length), m_traces(p_traces),
+          m_extra_data(p_extra_data)
+    {
+        validate_traces_length(m_traces);
+
+        if (!check_all_same_length(p_extra_data))
+        {
+            throw std::domain_error("Extra data must all be the same length");
+        }
+        Set_Cryptographic_Data_Length(p_extra_data.front().size());
     }
 
     //! @brief This is this function that adds headers to the list of
@@ -654,12 +683,24 @@ public:
         // required.
         output_file.put(0x00);
 
-        for (const auto& trace : m_traces)
-        for (const auto& sample :
-             this->convert_traces_to_bytes(m_traces, m_sample_length))
+        for (std::size_t i = 0; i < m_traces.size(); ++i)
         {
-            output_file << std::to_integer<uint8_t>(sample);
+            if (0 != m_extra_data.size())
+            {
+                for (const auto& character :
+                     this->convert_to_bytes(m_extra_data[i]))
+                {
+                    output_file << std::to_integer<uint8_t>(character);
+                }
+            }
+
+            for (const auto& sample :
+                 this->convert_traces_to_bytes(m_traces[i], m_sample_length))
+            {
+                output_file << std::to_integer<uint8_t>(sample);
+            }
         }
+
         output_file.close();
     }
 
@@ -722,8 +763,8 @@ public:
         Add_Header(Tag_Trace_Offset, p_offset);
     }
 
-    // TODO: Calling this with a float argument works. Validate to ensure that
-    // this does not work.
+    // TODO: Calling this with a float argument works. Validate to ensure
+    // that this does not work.
     void Set_Logarithmic_Scale(const std::uint8_t p_scale = 0)
     {
         Add_Header(Tag_Logarithmic_Scale, p_scale);
