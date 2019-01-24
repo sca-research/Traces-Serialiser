@@ -657,6 +657,7 @@ public:
         // the sample length can be reduced, saving a lot of file size.
 
         // Output each header
+        // // TODO: Split this into multiple functions
         for (const auto& header : m_headers)
         {
             // Output tag
@@ -683,16 +684,36 @@ public:
         // required.
         output_file.put(0x00);
 
+        // For each trace
         for (std::size_t i = 0; i < m_traces.size(); ++i)
         {
+            // Skip printing extra data if there is none. TODO: Is this even
+            // needed?
+            // // TODO: Split this into multiple functions
             if (0 != m_extra_data.size())
             {
-                for (const auto& character : m_extra_data[i])
+                // If this is completely numerical then output it as raw
+                // numbers, not ACSII.
+                if (std::all_of(std::begin(m_extra_data[i]),
+                                std::end(m_extra_data[i]),
+                                ::isdigit))
                 {
-                    output_file << character;
+                    for (const auto& character : m_extra_data[i])
+                    {
+                        output_file << character;
+                    }
+                }
+                else
+                {
+                    for (const auto& character : m_extra_data[i])
+                    {
+                        // Convert from ASCII to raw numbers then output.
+                        output_file << character - '0';
+                    }
                 }
             }
 
+            // // TODO: Split this into multiple functions
             for (const auto& sample :
                  this->convert_traces_to_bytes(m_traces[i], m_sample_length))
             {
