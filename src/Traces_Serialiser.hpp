@@ -687,10 +687,9 @@ public:
         {
             if (0 != m_extra_data.size())
             {
-                for (const auto& character :
-                     this->convert_to_bytes(m_extra_data[i]))
+                for (const auto& character : m_extra_data[i])
                 {
-                    output_file << std::to_integer<uint8_t>(character);
+                    output_file << character;
                 }
             }
 
