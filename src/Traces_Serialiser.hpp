@@ -431,6 +431,84 @@ private:
         return output;
     }
 
+    //! @todo: document
+    void save_headers(std::ofstream& m_output_file) const
+    {
+        // TODO: If all of the samples are smaller than the sample length then
+        // the sample length can be reduced, saving a lot of file size.
+
+        // Output each header
+        // // TODO: Split this into multiple functions
+        for (const auto& header : m_headers)
+        {
+            // Output tag
+            m_output_file << header.first;
+
+            // Output length
+            for (const auto& length_byte : header.second.first)
+            {
+                m_output_file << std::to_integer<uint8_t>(length_byte);
+            }
+
+            // Output value
+            for (const auto& value_byte : header.second.second)
+            {
+                m_output_file << std::to_integer<uint8_t>(value_byte);
+            }
+        }
+
+        // The start of traces is marked by a Trace Block Marker tag.
+        m_output_file << Tag_Trace_Block_Marker;
+
+        // The length of the Trace Block Marker (always 0) is still
+        // required.
+        m_output_file.put(0x00);
+    }
+
+    //! @todo: document
+    void save_extra_data(std::ofstream& m_output_file,
+                         const std::size_t p_index) const
+    {
+        // Skip printing extra data if there is none. TODO: Is this even
+        // needed?
+        // // TODO: Split this into multiple functions
+        if (0 == m_extra_data.size())
+        {
+            return;
+        }
+
+        // If this is completely numerical then output it as raw
+        // numbers, not ACSII.
+        if (std::all_of(std::begin(m_extra_data[p_index]),
+                        std::end(m_extra_data[p_index]),
+                        ::isdigit))
+        {
+            for (const auto& character : m_extra_data[p_index])
+            {
+                m_output_file << character;
+            }
+        }
+        else
+        {
+            for (const auto& character : m_extra_data[p_index])
+            {
+                // Convert from ASCII to raw numbers then output.
+                m_output_file << character - '0';
+            }
+        }
+    }
+
+    //! @todo: document
+    void save_trace(std::ofstream& m_output_file,
+                    const std::size_t p_index) const
+    {
+        for (const auto& sample :
+             this->convert_traces_to_bytes(m_traces[p_index], m_sample_length))
+        {
+            m_output_file << std::to_integer<uint8_t>(sample);
+        }
+    }
+
 public:
     // These variables are intended to improve readability and nothing more.
     // Public so user can write code like this:
@@ -571,6 +649,7 @@ public:
         validate_traces_length(m_traces);
     }
 
+    //! @todo Document
     Serialiser(const std::vector<std::string>& p_extra_data,
                const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
@@ -653,72 +732,13 @@ public:
                                          "the file to be written to");
         }
 
-        // TODO: If all of the samples are smaller than the sample length then
-        // the sample length can be reduced, saving a lot of file size.
-
-        // Output each header
-        // // TODO: Split this into multiple functions
-        for (const auto& header : m_headers)
-        {
-            // Output tag
-            output_file << header.first;
-
-            // Output length
-            for (const auto& length_byte : header.second.first)
-            {
-                output_file << std::to_integer<uint8_t>(length_byte);
-            }
-
-            // Output value
-            for (const auto& value_byte : header.second.second)
-            {
-                output_file << std::to_integer<uint8_t>(value_byte);
-            }
-        }
-
-        // Output the traces
-        // The start of traces is marked by a Trace Block Marker tag.
-        output_file << Tag_Trace_Block_Marker;
-
-        // The length of the Trace Block Marker (always 0) is still
-        // required.
-        output_file.put(0x00);
+        save_headers(output_file);
 
         // For each trace
         for (std::size_t i = 0; i < m_traces.size(); ++i)
         {
-            // Skip printing extra data if there is none. TODO: Is this even
-            // needed?
-            // // TODO: Split this into multiple functions
-            if (0 != m_extra_data.size())
-            {
-                // If this is completely numerical then output it as raw
-                // numbers, not ACSII.
-                if (std::all_of(std::begin(m_extra_data[i]),
-                                std::end(m_extra_data[i]),
-                                ::isdigit))
-                {
-                    for (const auto& character : m_extra_data[i])
-                    {
-                        output_file << character;
-                    }
-                }
-                else
-                {
-                    for (const auto& character : m_extra_data[i])
-                    {
-                        // Convert from ASCII to raw numbers then output.
-                        output_file << character - '0';
-                    }
-                }
-            }
-
-            // // TODO: Split this into multiple functions
-            for (const auto& sample :
-                 this->convert_traces_to_bytes(m_traces[i], m_sample_length))
-            {
-                output_file << std::to_integer<uint8_t>(sample);
-            }
+            save_extra_data(output_file, i);
+            save_trace(output_file, i);
         }
 
         output_file.close();
