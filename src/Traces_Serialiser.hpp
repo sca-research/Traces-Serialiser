@@ -465,13 +465,33 @@ private:
         m_output_file.put(0x00);
     }
 
-    //! @todo: document
-    void save_extra_data(std::ofstream& m_output_file,
-                         const std::size_t p_index) const
+    bool is_extra_data_digits() const
     {
         // Skip printing extra data if there is none. TODO: Is this even
         // needed?
-        // // TODO: Split this into multiple functions
+        if (0 == m_extra_data.size())
+        {
+            return false;
+        }
+
+        // If this is completely numerical then output it as raw
+        // numbers, not ACSII.
+        return std::all_of(std::begin(m_extra_data),
+                           std::end(m_extra_data),
+                           [](const std::string& string) {
+                               return std::all_of(std::begin(string),
+                                                  std::end(string),
+                                                  ::isdigit);
+                           });
+    }
+
+    //! @todo: document
+    void save_extra_data(std::ofstream& m_output_file,
+                         const std::size_t p_index,
+                         const bool m_is_digits) const
+    {
+        // Skip printing extra data if there is none. TODO: Is this even
+        // needed?
         if (0 == m_extra_data.size())
         {
             return;
@@ -479,21 +499,33 @@ private:
 
         // If this is completely numerical then output it as raw
         // numbers, not ACSII.
-        if (std::all_of(std::begin(m_extra_data[p_index]),
-                        std::end(m_extra_data[p_index]),
-                        ::isdigit))
+        if (m_is_digits)
         {
-            for (const auto& character : m_extra_data[p_index])
+
+            // Increment by 2 at a time as 2 characters fit into a byte.
+            for (std::size_t i = 0; i < m_extra_data[p_index].length() - 1;
+                 i += 2)
             {
-                m_output_file << character;
+                // Get two characters from the string as 2 character make up 1
+                // byte. Convert them to a number using std::stoi() and then
+                // convert the result to a byte using convert_to_bytes(). As
+                // convert_to_bytes() returns a vector but in this case it will
+                // only contain one byte, .front() is used to retrieve it from
+                // the vector. This is then converted to a std::uint8_t to allow
+                // the << operator to stream the result.
+                m_output_file << std::to_integer<std::uint8_t>(
+                    convert_to_bytes(
+                        std::stoi(m_extra_data[p_index].substr(i, 2).c_str(),
+                                  nullptr,
+                                  16))
+                        .front());
             }
         }
         else
         {
             for (const auto& character : m_extra_data[p_index])
             {
-                // Convert from ASCII to raw numbers then output.
-                m_output_file << character - '0';
+                m_output_file << character;
             }
         }
     }
@@ -505,7 +537,7 @@ private:
         for (const auto& sample :
              this->convert_traces_to_bytes(m_traces[p_index], m_sample_length))
         {
-            m_output_file << std::to_integer<uint8_t>(sample);
+            m_output_file << std::to_integer<std::uint8_t>(sample);
         }
     }
 
@@ -720,9 +752,6 @@ public:
     //! doesn't exist.
     void Save(const std::string& p_file_path)
     {
-        add_required_headers(
-            m_number_of_traces, m_samples_per_trace, m_sample_length);
-
         std::ofstream output_file(p_file_path,
                                   std::ios::out | std::ios::binary);
 
@@ -732,12 +761,30 @@ public:
                                          "the file to be written to");
         }
 
+        const auto is_digits = is_extra_data_digits();
+
+        if (is_digits)
+        {
+            // Digits take up half the space of ASCII.
+            // So retrieve the current value, half it and save it back.
+            Add_Header(Tag_Length_Of_Cryptographic_Data,
+                       std::to_integer<std::uint8_t>(
+                           m_headers[Tag_Length_Of_Cryptographic_Data]
+                               .second.front()) /
+                           2);
+        }
+
+        // This has to be done after changing the length of cryptographic data
+        // as it is dependant on that information.
+        add_required_headers(
+            m_number_of_traces, m_samples_per_trace, m_sample_length);
+
         save_headers(output_file);
 
         // For each trace
         for (std::size_t i = 0; i < m_traces.size(); ++i)
         {
-            save_extra_data(output_file, i);
+            save_extra_data(output_file, i, is_digits);
             save_trace(output_file, i);
         }
 
