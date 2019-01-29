@@ -481,7 +481,7 @@ private:
                            [](const std::string& string) {
                                return std::all_of(std::begin(string),
                                                   std::end(string),
-                                                  ::isdigit);
+                                                  ::isxdigit);
                            });
     }
 
