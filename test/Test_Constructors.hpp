@@ -90,19 +90,15 @@ TEST_CASE("Adding traces"
             {{0, 1, 2}, {3, 4, 5}}));
     }
 
-    SECTION("2D Constructor with extra data")
+    SECTION("2D Constructor with string extra data")
     {
         REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
             {"Hello", "World"}, {{0, 1, 2}, {3, 4, 5}}));
     }
 
-    // TODO: Move this elsewhere
-    /*
-     *SECTION("2D Constructor with extra data")
-     *{
-     *    Traces_Serialiser::Serialiser<std::uint8_t> serial(
-     *        {"Hello", "World"}, {{0, 1, 2}, {3, 4, 5}});
-     *    serial.Save("Extra_Data.trs");
-     *}
-     */
+    SECTION("2D Constructor with hex extra data")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {"678", "9ab"}, {{0, 1, 2}, {3, 4, 5}}));
+    }
 }

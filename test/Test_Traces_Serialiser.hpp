@@ -1484,6 +1484,100 @@ TEST_CASE("Saving headers"
                             std::end(expected_result)) == actual_result);
     }
 
+    SECTION("Saving with string extra data")
+    {
+        // Create some traces and serialise them to a trs file.
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {"Hello", "World"}, {{0, 1, 2}, {3, 4, 5}});
+        serialiser.Save(file_path);
+
+        // Load the trs file into a string
+        const std::string actual_result = load_file(file_path);
+
+        // clang-format off
+        const std::vector<std::uint8_t> expected_result = {
+            0x41,  // Number of traces
+            0x01,  // Length
+            0x02,  // Value
+            0x42,  // Number of Samples per Trace
+            0x01,  // Length
+            0x03,  // Value
+            0x43,  // Sample Coding
+            0x01,  // Length
+            0x01,  // Value
+            0x44,  // Cryptographic data Length
+            0x01,  // Length
+            0x05,  // Value
+            0x5f,  // Trace Block Marker
+            0x00,  // Length (Always 0)
+            0x48,  // Start of trace 1 extra data
+            0x65,
+            0x6c,
+            0x6c,
+            0x6f,
+            0x00,  // Start of trace 1
+            0x01,
+            0x02,
+            0x57,  // Start of trace 2 extra data
+            0x6f,
+            0x72,
+            0x6c,
+            0x64,
+            0x03,  // Start of trace 2
+            0x04,
+            0x05};
+        // clang-format on
+
+        // Ensure that the actual result is the same as the expected result.
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
+    }
+
+    SECTION("Saving with hex extra data")
+    {
+        // Create some traces and serialise them to a trs file.
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {"6789", "abcd"}, {{0, 1, 2}, {3, 4, 5}});
+        // serialiser.Save(file_path);
+        serialiser.Save(file_path);
+
+        // Load the trs file into a string
+        // const std::string actual_result = load_file(file_path);
+        const std::string actual_result = load_file(file_path);
+
+        // clang-format off
+        const std::vector<std::uint8_t> expected_result = {
+            0x41,  // Number of traces
+            0x01,  // Length
+            0x02,  // Value
+            0x42,  // Number of Samples per Trace
+            0x01,  // Length
+            0x03,  // Value
+            0x43,  // Sample Coding
+            0x01,  // Length
+            0x01,  // Value
+            0x44,  // Cryptographic data Length
+            0x01,  // Length
+            0x02,  // Value
+            0x5f,  // Trace Block Marker
+            0x00,  // Length (Always 0)
+            0x67,  // Start of trace 1 extra data
+            0x89,
+            0x00,  // Start of trace 1
+            0x01,
+            0x02,
+            0xab,  // Start of trace 2 extra data
+            0xcd,
+            0x03,  // Start of trace 2
+            0x04,
+            0x05};
+        // clang-format on
+
+        // Ensure that the actual result is the same as the expected result.
+        REQUIRE(std::string(std::begin(expected_result),
+                            std::end(expected_result)) == actual_result);
+    }
+
     // TODO: Check the sample length is correctly detected for every
     // trace
 }
