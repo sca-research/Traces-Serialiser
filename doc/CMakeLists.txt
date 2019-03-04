@@ -37,7 +37,7 @@ if(DOXYGEN_FOUND)
     )
 
     # add a target to generate API documentation with Doxygen
-    add_custom_target(doc ${ALL_OPTION}
+    add_custom_target(${PROJECT_NAME}_doc ${ALL_OPTION}
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen" VERBATIM
