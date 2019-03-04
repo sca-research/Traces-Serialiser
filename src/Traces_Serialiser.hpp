@@ -313,6 +313,22 @@ private:
         }
     }
 
+    //! @brief Checks if all of the extra data within p_extra_data of the same
+    //! length. This does not return anything as an exception will be thrown if
+    //! the validation fails.
+    //! @param p_extra_data The data to be checked
+    //! @exception std::domain_error If they are not all the same length then
+    //! this exception is thrown.
+    template <typename T_Traces>
+    static constexpr void
+    validate_extra_data_length(const std::vector<T_Traces>& p_extra_data)
+    {
+        if (!check_all_same_length(p_extra_data))
+        {
+            throw std::domain_error("Extra data must all be the same length");
+        }
+    }
+
     template <typename T>
     static constexpr bool check_all_same_length(const std::vector<T> p_data)
     {
@@ -695,11 +711,8 @@ public:
           m_extra_data(p_extra_data)
     {
         validate_traces_length(m_traces);
+        validate_extra_data_length(p_extra_data);
 
-        if (!check_all_same_length(p_extra_data))
-        {
-            throw std::domain_error("Extra data must all be the same length");
-        }
         Set_Cryptographic_Data_Length(p_extra_data.front().size());
     }
 
