@@ -639,14 +639,13 @@ public:
     {
         decltype(m_traces) chunked;
 
-        for (std::size_t i = 0, size = p_traces.size(); i < size; ++i)
+        for (auto it = std::begin(p_traces); std::end(p_traces) != it; ++it)
         {
-            const auto first =
-                std::begin(p_traces) + static_cast<std::int8_t>(i);
-            const auto last = first + p_samples_per_trace;
+            const auto last = it + p_samples_per_trace;
 
-            chunked.emplace_back(std::vector<T_Sample>(first, last));
+            chunked.emplace_back(std::vector<T_Sample>(it, last));
         }
+
         return chunked;
     }
 
