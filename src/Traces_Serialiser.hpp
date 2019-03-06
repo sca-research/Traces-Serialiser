@@ -196,7 +196,7 @@ private:
         // For each value in the vector
         for (const auto& data : p_data)
         {
-            const std::vector<std::byte> data_vector = [&]() {
+            const std::vector<std::byte> data_vector{[&]() {
                 // If this is nested container, recursively unpack it until
                 // we get at the values inside.
                 if constexpr (!std::is_same<std::vector<T_Traces>,
@@ -210,7 +210,7 @@ private:
                 // if this is not a nested container simply convert
                 // each of the values.
                 return pad(convert_to_bytes(data), p_sample_length);
-            }();
+            }()};
 
             // Append the converted values onto the end of bytes_vector
             // ready to be returned.
@@ -517,18 +517,19 @@ private:
         // numbers, not ACSII.
         if (m_is_digits)
         {
-
             // Increment by 2 at a time as 2 characters fit into a byte.
-            for (std::size_t i = 0; i < m_extra_data[p_index].length() - 1;
+            for (std::size_t i{0}, size{m_extra_data[p_index].length() - 1};
+                 i < size;
                  i += 2)
             {
-                // Get two characters from the string as 2 character make up 1
-                // byte. Convert them to a number using std::stoi() and then
-                // convert the result to a byte using convert_to_bytes(). As
-                // convert_to_bytes() returns a vector but in this case it will
-                // only contain one byte, .front() is used to retrieve it from
-                // the vector. This is then converted to a std::uint8_t to allow
-                // the << operator to stream the result.
+                // Get two characters from the string as 2 character make up
+                // 1 byte. Convert them to a number using std::stoi() and
+                // then convert the result to a byte using
+                // convert_to_bytes(). As convert_to_bytes() returns a
+                // vector but in this case it will only contain one byte,
+                // .front() is used to retrieve it from the vector. This is
+                // then converted to a std::uint8_t to allow the << operator
+                // to stream the result.
                 m_output_file << std::to_integer<std::uint8_t>(
                     convert_to_bytes(
                         std::stoi(m_extra_data[p_index].substr(i, 2).c_str(),
@@ -562,55 +563,55 @@ public:
     // Public so user can write code like this:
     // Add_Header(Tag_Number_Of_Traces, 4);
     // clang-format off
-    constexpr static std::uint8_t Tag_Number_Of_Traces                 = 0x41;
-    constexpr static std::uint8_t Tag_Number_Of_Samples_Per_Trace      = 0x42;
-    constexpr static std::uint8_t Tag_Sample_Coding                    = 0x43;
-    constexpr static std::uint8_t Tag_Length_Of_Cryptographic_Data     = 0x44;
-    constexpr static std::uint8_t Tag_Title_Space_Per_Trace            = 0x45;
-    constexpr static std::uint8_t Tag_Trace_Title                      = 0x46;
-    constexpr static std::uint8_t Tag_Description                      = 0x47;
-    constexpr static std::uint8_t Tag_Axis_Offset_X                    = 0x48;
-    constexpr static std::uint8_t Tag_Axis_Label_X                     = 0x49;
-    constexpr static std::uint8_t Tag_Axis_Label_Y                     = 0x4A;
-    constexpr static std::uint8_t Tag_Axis_Scale_X                     = 0x4B;
-    constexpr static std::uint8_t Tag_Axis_Scale_Y                     = 0x4C;
-    constexpr static std::uint8_t Tag_Trace_Offset                     = 0x4D;
-    constexpr static std::uint8_t Tag_Logarithmic_Scale                = 0x4E;
+    constexpr static std::uint8_t Tag_Number_Of_Traces                 { 0x41};
+    constexpr static std::uint8_t Tag_Number_Of_Samples_Per_Trace      { 0x42};
+    constexpr static std::uint8_t Tag_Sample_Coding                    { 0x43};
+    constexpr static std::uint8_t Tag_Length_Of_Cryptographic_Data     { 0x44};
+    constexpr static std::uint8_t Tag_Title_Space_Per_Trace            { 0x45};
+    constexpr static std::uint8_t Tag_Trace_Title                      { 0x46};
+    constexpr static std::uint8_t Tag_Description                      { 0x47};
+    constexpr static std::uint8_t Tag_Axis_Offset_X                    { 0x48};
+    constexpr static std::uint8_t Tag_Axis_Label_X                     { 0x49};
+    constexpr static std::uint8_t Tag_Axis_Label_Y                     { 0x4A};
+    constexpr static std::uint8_t Tag_Axis_Scale_X                     { 0x4B};
+    constexpr static std::uint8_t Tag_Axis_Scale_Y                     { 0x4C};
+    constexpr static std::uint8_t Tag_Trace_Offset                     { 0x4D};
+    constexpr static std::uint8_t Tag_Logarithmic_Scale                { 0x4E};
     // 0x4F - 0x54 Reserved for future use.
-    constexpr static std::uint8_t Tag_Scope_Range                      = 0x55;
-    constexpr static std::uint8_t Tag_Scope_Coupling                   = 0x56;
-    constexpr static std::uint8_t Tag_Scope_Offset                     = 0x57;
-    constexpr static std::uint8_t Tag_Scope_Input_Impedance            = 0x58;
-    constexpr static std::uint8_t Tag_Scope_ID                         = 0x59;
-    constexpr static std::uint8_t Tag_Filter_Type                      = 0x5A;
-    constexpr static std::uint8_t Tag_Filter_Frequency                 = 0x5B;
-    constexpr static std::uint8_t Tag_Filter_Range                     = 0x5C;
+    constexpr static std::uint8_t Tag_Scope_Range                      { 0x55};
+    constexpr static std::uint8_t Tag_Scope_Coupling                   { 0x56};
+    constexpr static std::uint8_t Tag_Scope_Offset                     { 0x57};
+    constexpr static std::uint8_t Tag_Scope_Input_Impedance            { 0x58};
+    constexpr static std::uint8_t Tag_Scope_ID                         { 0x59};
+    constexpr static std::uint8_t Tag_Filter_Type                      { 0x5A};
+    constexpr static std::uint8_t Tag_Filter_Frequency                 { 0x5B};
+    constexpr static std::uint8_t Tag_Filter_Range                     { 0x5C};
     // 0x5D - 0x5E Undocumented.
-    constexpr static std::uint8_t Tag_Trace_Block_Marker               = 0x5F;
-    constexpr static std::uint8_t Tag_External_Clock_Used              = 0x60;
-    constexpr static std::uint8_t Tag_External_Clock_Threshold         = 0x61;
-    constexpr static std::uint8_t Tag_External_Clock_Multiplier        = 0x62;
-    constexpr static std::uint8_t Tag_External_Clock_Phase_Shift       = 0x63;
-    constexpr static std::uint8_t Tag_External_Clock_Resampler_Mask    = 0x64;
-    constexpr static std::uint8_t Tag_External_Clock_Resampler_Enabled = 0x65;
-    constexpr static std::uint8_t Tag_External_Clock_Frequency         = 0x66;
-    constexpr static std::uint8_t Tag_External_Clock_Time_Base         = 0x67;
+    constexpr static std::uint8_t Tag_Trace_Block_Marker               { 0x5F};
+    constexpr static std::uint8_t Tag_External_Clock_Used              { 0x60};
+    constexpr static std::uint8_t Tag_External_Clock_Threshold         { 0x61};
+    constexpr static std::uint8_t Tag_External_Clock_Multiplier        { 0x62};
+    constexpr static std::uint8_t Tag_External_Clock_Phase_Shift       { 0x63};
+    constexpr static std::uint8_t Tag_External_Clock_Resampler_Mask    { 0x64};
+    constexpr static std::uint8_t Tag_External_Clock_Resampler_Enabled { 0x65};
+    constexpr static std::uint8_t Tag_External_Clock_Frequency         { 0x66};
+    constexpr static std::uint8_t Tag_External_Clock_Time_Base         { 0x67};
     // clang-format on
 
-    //! @brief Constructs the Serialiser object and adds all of the mandatory
-    //! data.
-    //! This constructor requires the number of traces and number of
-    //! samples per trace to be set as parameters. The mandatory sample coding
-    //! header is calculated from the length of one sample. Optional headers can
-    //! be set later. All traces are required to be passed to the constructor as
-    //! well.
+    //! @brief Constructs the Serialiser object and adds all of the
+    //! mandatory data. This constructor requires the number of traces and
+    //! number of samples per trace to be set as parameters. The mandatory
+    //! sample coding header is calculated from the length of one sample.
+    //! Optional headers can be set later. All traces are required to be
+    //! passed to the constructor as well.
     //! @param p_number_of_traces The number of traces to be saved.
     //! @param p_samples_per_trace The number of samples in each individual
     //! trace.
     //! @param p_traces All of the traces as stored as a vector of samples.
-    //! @param p_sample_length The length of a trace sample in bytes. This can
-    //! optionally be specified. If not specified then it is assumed to be the
-    //! size of the data type samples are stored as, given by T_Sample.
+    //! @param p_sample_length The length of a trace sample in bytes. This
+    //! can optionally be specified. If not specified then it is assumed to
+    //! be the size of the data type samples are stored as, given by
+    //! T_Sample.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<T_Sample>& p_traces,
@@ -733,18 +734,18 @@ public:
         validate_header(p_tag);
 
         // A temporary variable to convert p_data to bytes.
-        const std::vector<std::byte> value = convert_to_bytes(p_data);
+        const std::vector<std::byte> value{convert_to_bytes(p_data)};
 
         std::vector<std::byte> length = convert_to_bytes(value.size());
 
         // If the length doesn't fit into 7 bits then the 8th bit is set
-        // indicating that more than one byte is used to store the length and
-        // that the first byte is the length of the length.
+        // indicating that more than one byte is used to store the length
+        // and that the first byte is the length of the length.
         if (0b01111111 < value.size())
         {
-            // TODO: If the length is longer than 65025 bytes (65KB) then the
-            // resulting file will be incorrect. Does this need to be accounted
-            // for?
+            // TODO: If the length is longer than 65025 bytes (65KB) then
+            // the resulting file will be incorrect. Does this need to be
+            // accounted for?
             length.insert(length.begin(),
                           std::byte(0b10000000 | length.size()));
         }
@@ -773,7 +774,7 @@ public:
                                          "the file to be written to");
         }
 
-        const auto is_digits = is_extra_data_digits();
+        const bool is_digits{is_extra_data_digits()};
 
         if (is_digits)
         {
@@ -786,15 +787,15 @@ public:
                            2);
         }
 
-        // This has to be done after changing the length of cryptographic data
-        // as it is dependant on that information.
+        // This has to be done after changing the length of cryptographic
+        // data as it is dependant on that information.
         add_required_headers(
             m_number_of_traces, m_samples_per_trace, m_sample_length);
 
         save_headers(output_file);
 
         // For each trace
-        for (std::size_t i = 0; i < m_traces.size(); ++i)
+        for (std::size_t i{0}, size{m_traces.size()}; i < size; ++i)
         {
             save_extra_data(output_file, i, is_digits);
             save_trace(output_file, i);
