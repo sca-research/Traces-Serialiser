@@ -620,7 +620,7 @@ public:
                const std::uint8_t p_sample_length = sizeof(T_Sample))
         : m_headers(), m_number_of_traces(p_number_of_traces),
           m_samples_per_trace(p_samples_per_trace),
-          m_sample_length(p_sample_length),
+          m_sample_length(p_sample_length), m_extra_data{},
           m_traces(split_into_traces(p_traces, m_samples_per_trace))
     {
         // TODO: Add more validation to sample length. x8 cannot be longer
@@ -628,11 +628,10 @@ public:
         validate_traces_length(m_traces);
     }
 
-    //! @brief Constructs the Serialiser object and adds all of the mandatory
-    //! data.
-    //! This constructor requires the number of traces to be set as a
-    //! parameter. Optional headers can be set later. All traces are
-    //! required to be passed to the constructor as well.
+    //! @brief Constructs the Serialiser object and adds all of the
+    //! mandatory data. This constructor requires the number of traces to be
+    //! set as a parameter. Optional headers can be set later. All traces
+    //! are required to be passed to the constructor as well.
     //! @todo: Document
     static decltype(m_traces)
     split_into_traces(const std::vector<T_Sample>& p_traces,
@@ -664,22 +663,22 @@ public:
         : m_headers(), m_number_of_traces(p_number_of_traces),
           m_samples_per_trace(
               safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces)),
-          m_sample_length(sizeof(T_Sample)),
+          m_sample_length(sizeof(T_Sample)), m_extra_data{},
           m_traces(split_into_traces(p_traces, m_samples_per_trace))
     {
         validate_traces_length(m_traces);
     }
 
-    //! @brief Constructs the Serialiser object and adds all of the mandatory
-    //! data.
-    //! Optional headers can be set later. All traces are required to be
-    //! passed to the constructor.
+    //! @brief Constructs the Serialiser object and adds all of the
+    //! mandatory data. Optional headers can be set later. All traces are
+    //! required to be passed to the constructor.
     //! @param p_traces All of the traces stored as 2D vector. This is
     //! interpreted as a vector of traces with each trace being a vector of
     //! samples.
-    //! @param p_sample_length The length of a trace sample in bytes. This can
-    //! optionally be specified. If not specified then it is assumed to be the
-    //! size of the data type samples are stored as, given by T_Sample.
+    //! @param p_sample_length The length of a trace sample in bytes. This
+    //! can optionally be specified. If not specified then it is assumed to
+    //! be the size of the data type samples are stored as, given by
+    //! T_Sample.
     // TODO: Add support for cryptographic data to be included in each
     // trace.
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
@@ -692,7 +691,7 @@ public:
           // p_traces.
           m_samples_per_trace(
               safe_cast<std::uint32_t>(p_traces.front().size())),
-          m_sample_length(p_sample_length), m_traces(p_traces)
+          m_sample_length(p_sample_length), m_extra_data{}, m_traces(p_traces)
     {
         validate_traces_length(m_traces);
     }
@@ -707,8 +706,8 @@ public:
           // one trace.
           m_samples_per_trace(
               safe_cast<std::uint32_t>(p_traces.front().size())),
-          m_sample_length(p_sample_length), m_traces(p_traces),
-          m_extra_data(p_extra_data)
+          m_sample_length(p_sample_length), m_extra_data{p_extra_data},
+          m_traces(p_traces)
     {
         validate_traces_length(m_traces);
         validate_extra_data_length(p_extra_data);
