@@ -563,39 +563,39 @@ public:
     // Public so user can write code like this:
     // Add_Header(Tag_Number_Of_Traces, 4);
     // clang-format off
-    constexpr static std::uint8_t Tag_Number_Of_Traces                 { 0x41};
-    constexpr static std::uint8_t Tag_Number_Of_Samples_Per_Trace      { 0x42};
-    constexpr static std::uint8_t Tag_Sample_Coding                    { 0x43};
-    constexpr static std::uint8_t Tag_Length_Of_Cryptographic_Data     { 0x44};
-    constexpr static std::uint8_t Tag_Title_Space_Per_Trace            { 0x45};
-    constexpr static std::uint8_t Tag_Trace_Title                      { 0x46};
-    constexpr static std::uint8_t Tag_Description                      { 0x47};
-    constexpr static std::uint8_t Tag_Axis_Offset_X                    { 0x48};
-    constexpr static std::uint8_t Tag_Axis_Label_X                     { 0x49};
-    constexpr static std::uint8_t Tag_Axis_Label_Y                     { 0x4A};
-    constexpr static std::uint8_t Tag_Axis_Scale_X                     { 0x4B};
-    constexpr static std::uint8_t Tag_Axis_Scale_Y                     { 0x4C};
-    constexpr static std::uint8_t Tag_Trace_Offset                     { 0x4D};
-    constexpr static std::uint8_t Tag_Logarithmic_Scale                { 0x4E};
+    constexpr static std::uint8_t Tag_Number_Of_Traces                 {0x41};
+    constexpr static std::uint8_t Tag_Number_Of_Samples_Per_Trace      {0x42};
+    constexpr static std::uint8_t Tag_Sample_Coding                    {0x43};
+    constexpr static std::uint8_t Tag_Length_Of_Cryptographic_Data     {0x44};
+    constexpr static std::uint8_t Tag_Title_Space_Per_Trace            {0x45};
+    constexpr static std::uint8_t Tag_Trace_Title                      {0x46};
+    constexpr static std::uint8_t Tag_Description                      {0x47};
+    constexpr static std::uint8_t Tag_Axis_Offset_X                    {0x48};
+    constexpr static std::uint8_t Tag_Axis_Label_X                     {0x49};
+    constexpr static std::uint8_t Tag_Axis_Label_Y                     {0x4A};
+    constexpr static std::uint8_t Tag_Axis_Scale_X                     {0x4B};
+    constexpr static std::uint8_t Tag_Axis_Scale_Y                     {0x4C};
+    constexpr static std::uint8_t Tag_Trace_Offset                     {0x4D};
+    constexpr static std::uint8_t Tag_Logarithmic_Scale                {0x4E};
     // 0x4F - 0x54 Reserved for future use.
-    constexpr static std::uint8_t Tag_Scope_Range                      { 0x55};
-    constexpr static std::uint8_t Tag_Scope_Coupling                   { 0x56};
-    constexpr static std::uint8_t Tag_Scope_Offset                     { 0x57};
-    constexpr static std::uint8_t Tag_Scope_Input_Impedance            { 0x58};
-    constexpr static std::uint8_t Tag_Scope_ID                         { 0x59};
-    constexpr static std::uint8_t Tag_Filter_Type                      { 0x5A};
-    constexpr static std::uint8_t Tag_Filter_Frequency                 { 0x5B};
-    constexpr static std::uint8_t Tag_Filter_Range                     { 0x5C};
+    constexpr static std::uint8_t Tag_Scope_Range                      {0x55};
+    constexpr static std::uint8_t Tag_Scope_Coupling                   {0x56};
+    constexpr static std::uint8_t Tag_Scope_Offset                     {0x57};
+    constexpr static std::uint8_t Tag_Scope_Input_Impedance            {0x58};
+    constexpr static std::uint8_t Tag_Scope_ID                         {0x59};
+    constexpr static std::uint8_t Tag_Filter_Type                      {0x5A};
+    constexpr static std::uint8_t Tag_Filter_Frequency                 {0x5B};
+    constexpr static std::uint8_t Tag_Filter_Range                     {0x5C};
     // 0x5D - 0x5E Undocumented.
-    constexpr static std::uint8_t Tag_Trace_Block_Marker               { 0x5F};
-    constexpr static std::uint8_t Tag_External_Clock_Used              { 0x60};
-    constexpr static std::uint8_t Tag_External_Clock_Threshold         { 0x61};
-    constexpr static std::uint8_t Tag_External_Clock_Multiplier        { 0x62};
-    constexpr static std::uint8_t Tag_External_Clock_Phase_Shift       { 0x63};
-    constexpr static std::uint8_t Tag_External_Clock_Resampler_Mask    { 0x64};
-    constexpr static std::uint8_t Tag_External_Clock_Resampler_Enabled { 0x65};
-    constexpr static std::uint8_t Tag_External_Clock_Frequency         { 0x66};
-    constexpr static std::uint8_t Tag_External_Clock_Time_Base         { 0x67};
+    constexpr static std::uint8_t Tag_Trace_Block_Marker               {0x5F};
+    constexpr static std::uint8_t Tag_External_Clock_Used              {0x60};
+    constexpr static std::uint8_t Tag_External_Clock_Threshold         {0x61};
+    constexpr static std::uint8_t Tag_External_Clock_Multiplier        {0x62};
+    constexpr static std::uint8_t Tag_External_Clock_Phase_Shift       {0x63};
+    constexpr static std::uint8_t Tag_External_Clock_Resampler_Mask    {0x64};
+    constexpr static std::uint8_t Tag_External_Clock_Resampler_Enabled {0x65};
+    constexpr static std::uint8_t Tag_External_Clock_Frequency         {0x66};
+    constexpr static std::uint8_t Tag_External_Clock_Time_Base         {0x67};
     // clang-format on
 
     //! @brief Constructs the Serialiser object and adds all of the
