@@ -86,11 +86,11 @@ private:
         m_headers;
 
     //! @todo Document
-    const std::uint32_t m_number_of_traces;
+    std::uint32_t m_number_of_traces;
     const std::uint32_t m_samples_per_trace;
     const std::uint8_t m_sample_length;
 
-    const std::vector<std::string> m_extra_data;
+    std::vector<std::string> m_extra_data;
 
     //! This contains the actual side channel analysis traces, stored as
     //! bytes ready to be saved into the output file.
@@ -713,6 +713,30 @@ public:
         validate_extra_data_length(p_extra_data);
 
         Set_Cryptographic_Data_Length(p_extra_data.front().size());
+    }
+
+
+    //! @brief This appends a single trace to the end of the list of traces.
+    //! Extra data associated with this trace can also be added using
+    //! p_extra_data. This will also validate the length of this data and
+    //! can throw exceptions if this is of the incorrect length.
+    //! @param p_trace The trace to be added.
+    //! @param p_extra_data The extra data with this trace to be added.
+    void Add_Trace(const std::vector<T_Sample>& p_trace,
+                   const std::string& p_extra_data = std::string{})
+    {
+        m_traces.emplace_back(p_trace);
+
+        if (!p_extra_data.empty())
+        {
+            m_extra_data.emplace_back(p_extra_data);
+        }
+
+        validate_traces_length(m_traces);
+        validate_extra_data_length(m_extra_data);
+
+        // TODO: Does this need to be stored?
+        m_number_of_traces++;
     }
 
     //! @brief This is this function that adds headers to the list of
