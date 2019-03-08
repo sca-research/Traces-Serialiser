@@ -330,7 +330,7 @@ private:
     }
 
     template <typename T>
-    static constexpr bool check_all_same_length(const std::vector<T> p_data)
+    static constexpr bool check_all_same_length(const std::vector<T>& p_data)
     {
         // If everything in p_data is not the same length
         //
