@@ -1402,32 +1402,44 @@ TEST_CASE("Saving headers"
 
     SECTION("Different length traces - 2 traces")
     {
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {{1, 2, 3}, {4, 5}});
+
         REQUIRE_THROWS_WITH(
-            Traces_Serialiser::Serialiser({{1, 2, 3}, {4, 5}}),
+            serialiser.Save(file_path),
             Catch::Matchers::Contains("Traces must all contain the same number "
                                       "of samples in a TRS file."));
     }
 
     SECTION("Different length traces - 3 traces")
     {
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {{1, 2, 3}, {4, 5, 6}, {7}});
+
         REQUIRE_THROWS_WITH(
-            Traces_Serialiser::Serialiser({{1, 2, 3}, {4, 5, 6}, {7}}),
+            serialiser.Save(file_path),
             Catch::Matchers::Contains("Traces must all contain the same number "
                                       "of samples in a TRS file."));
     }
 
     SECTION("Different length traces - 4 traces")
     {
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {{1}, {2}, {3, 4}, {5}});
+
         REQUIRE_THROWS_WITH(
-            Traces_Serialiser::Serialiser({{1}, {2}, {3, 4}, {5}}),
+            serialiser.Save(file_path),
             Catch::Matchers::Contains("Traces must all contain the same number "
                                       "of samples in a TRS file."));
     }
 
     SECTION("Different length traces - blank trace")
     {
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser(
+            {{1, 2, 3}, {}, {4, 5, 6}});
+
         REQUIRE_THROWS_WITH(
-            Traces_Serialiser::Serialiser({{1, 2, 3}, {}, {4, 5, 6}}),
+            serialiser.Save(file_path),
             Catch::Matchers::Contains("Traces must all contain the same number "
                                       "of samples in a TRS file."));
     }
