@@ -529,7 +529,7 @@ private:
                     const std::size_t p_index) const
     {
         for (const auto& sample :
-             this->convert_traces_to_bytes(m_traces[p_index], m_sample_length))
+             convert_traces_to_bytes(m_traces[p_index], m_sample_length))
         {
             m_output_file << std::to_integer<std::uint8_t>(sample);
         }
@@ -686,12 +686,23 @@ public:
     {
         // If this is the first trace provided then m_samples_per_trace needs to
         // be set.
-        if (m_traces.empty())
+        // m_traces can contain 0 as the first element as a side effect of
+        // initialisation.
+        if (m_traces.front().empty())
         {
             m_samples_per_trace = p_trace.size();
-        }
+            // If this was an empty trace set, m_traces can contain 0 as the
+            // first element.
+            m_traces[0] = p_trace;
 
-        m_traces.emplace_back(p_trace);
+            // Reset m_number_of_traces as this is the first element. This will
+            // be incremented shortly.
+            m_number_of_traces = 0;
+        }
+        else
+        {
+            m_traces.emplace_back(p_trace);
+        }
 
         if (!p_extra_data.empty())
         {
@@ -813,7 +824,6 @@ public:
     // The default parameters in the following functions are copied from the
     // Riscure inspector documentation.
 
-    // TODO: Implement this.
     // TODO: Rename
     // https://wandbox.org/permlink/TiG2k4xzQUojzfdO
     void Set_Cryptographic_Data_Length(const std::uint16_t p_length = 0)
