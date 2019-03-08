@@ -602,7 +602,6 @@ public:
     {
         // TODO: Add more validation to sample length. x8 cannot be longer
         // than sizeof(T_Sample)
-        validate_traces_length(m_traces);
     }
 
     //! @brief Constructs the Serialiser object and adds all of the
@@ -642,7 +641,6 @@ public:
           m_sample_length{sizeof(T_Sample)}, m_extra_data{},
           m_traces{split_into_traces(p_traces, m_samples_per_trace)}
     {
-        validate_traces_length(m_traces);
     }
 
     //! @brief Constructs the Serialiser object and adds all of the
@@ -667,7 +665,6 @@ public:
           m_samples_per_trace{p_traces.front().size()},
           m_sample_length{p_sample_length}, m_extra_data{}, m_traces{p_traces}
     {
-        validate_traces_length(m_traces);
     }
 
     //! @todo Document
@@ -681,10 +678,6 @@ public:
           m_sample_length{p_sample_length},
           m_extra_data{p_extra_data}, m_traces{p_traces}
     {
-        validate_traces_length(m_traces);
-        validate_extra_data_length(p_extra_data);
-
-        Set_Cryptographic_Data_Length(p_extra_data.front().size());
     }
 
 
@@ -703,9 +696,6 @@ public:
         {
             m_extra_data.emplace_back(p_extra_data);
         }
-
-        validate_traces_length(m_traces);
-        validate_extra_data_length(m_extra_data);
 
         // TODO: Does this need to be stored?
         m_number_of_traces++;
@@ -769,18 +759,33 @@ public:
                                          "the file to be written to");
         }
 
-        const bool is_digits{is_extra_data_digits()};
+        bool is_digits{false};
 
-        if (is_digits)
+        // Set this header to match the data that is stored.
+        //! @todo this will override any user set value. Maybe make this a
+        //! private function as a solution?
+        if (m_extra_data.size() > 0)  // Don't do this if not extra data is
+                                      // supplied, it will cause a Segfault.
         {
-            // Digits take up half the space of ASCII.
-            // So retrieve the current value, half it and save it back.
-            Add_Header(Tag_Length_Of_Cryptographic_Data,
-                       std::to_integer<std::uint8_t>(
-                           m_headers[Tag_Length_Of_Cryptographic_Data]
-                               .second.front()) /
-                           2);
+            Set_Cryptographic_Data_Length(m_extra_data.front().size());
+            is_digits = is_extra_data_digits();
+
+            if (is_digits)
+            {
+                // Digits take up half the space of ASCII.
+                // So retrieve the current value, half it and save it back.
+                Add_Header(Tag_Length_Of_Cryptographic_Data,
+                           std::to_integer<std::uint8_t>(
+                               m_headers[Tag_Length_Of_Cryptographic_Data]
+                                   .second.front()) /
+                               2);
+            }
         }
+
+        // Ensure information stored will create a valid trs file.
+        //! @todo Group all THREE validation functions in a valid function.
+        validate_traces_length(m_traces);
+        validate_extra_data_length(m_extra_data);
 
         // This has to be done after changing the length of cryptographic
         // data as it is dependant on that information.
@@ -790,10 +795,13 @@ public:
         save_headers(output_file);
 
         // For each trace
-        for (std::size_t i{0}, size{m_traces.size()}; i < size; ++i)
         {
-            save_extra_data(output_file, i, is_digits);
-            save_trace(output_file, i);
+            const std::size_t size{m_traces.size()};
+            for (std::size_t i{0}; i < size; ++i)
+            {
+                save_extra_data(output_file, i, is_digits);
+                save_trace(output_file, i);
+            }
         }
 
         output_file.close();
