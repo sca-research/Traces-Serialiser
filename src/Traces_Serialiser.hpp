@@ -680,6 +680,12 @@ public:
     {
     }
 
+    //! @todo Document
+    explicit Serialiser(const std::uint8_t p_sample_length = sizeof(T_Sample))
+        : m_headers{}, m_number_of_traces{0}, m_samples_per_trace{},
+          m_sample_length{p_sample_length}, m_extra_data{}, m_traces{}
+    {
+    }
 
     //! @brief This appends a single trace to the end of the list of traces.
     //! Extra data associated with this trace can also be added using
