@@ -636,10 +636,8 @@ public:
     // trace.
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces)
-        : m_headers{}, m_number_of_traces{p_number_of_traces},
-          m_samples_per_trace{p_traces.size() / p_number_of_traces},
-          m_sample_length{sizeof(T_Sample)}, m_extra_data{},
-          m_traces{split_into_traces(p_traces, m_samples_per_trace)}
+        : Serialiser{
+              split_into_traces(p_traces, p_traces.size() / p_number_of_traces)}
     {
     }
 
@@ -657,17 +655,13 @@ public:
     // trace.
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers{}, m_number_of_traces{p_traces.size()},
-          // Number of samples per trace can be assumed to be the length of
-          // one trace.
-          // TODO: This doesn't work if there is extra cryptographic data in
-          // p_traces.
-          m_samples_per_trace{p_traces.front().size()},
-          m_sample_length{p_sample_length}, m_extra_data{}, m_traces{p_traces}
+        : Serialiser{{}, p_traces, p_sample_length}
     {
     }
 
     //! @todo Document
+    //! @todo Does p_sample_length ever need to be specified manually? It
+    //! certainly does not for 2d constructors.
     Serialiser(const std::vector<std::string>& p_extra_data,
                const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
@@ -682,8 +676,7 @@ public:
 
     //! @todo Document
     explicit Serialiser(const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers{}, m_number_of_traces{0}, m_samples_per_trace{},
-          m_sample_length{p_sample_length}, m_extra_data{}, m_traces{}
+        : Serialiser{{{}}, p_sample_length}
     {
     }
 
