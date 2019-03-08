@@ -87,7 +87,7 @@ private:
 
     //! @todo Document
     std::uint64_t m_number_of_traces;  //!@todo Does this need to be stored?
-    const std::uint64_t m_samples_per_trace;
+    std::uint64_t m_samples_per_trace;
     const std::uint8_t m_sample_length;
 
     std::vector<std::string> m_extra_data;
@@ -690,6 +690,13 @@ public:
     void Add_Trace(const std::vector<T_Sample>& p_trace,
                    const std::string& p_extra_data = std::string{})
     {
+        // If this is the first trace provided then m_samples_per_trace needs to
+        // be set.
+        if (m_traces.empty())
+        {
+            m_samples_per_trace = p_trace.size();
+        }
+
         m_traces.emplace_back(p_trace);
 
         if (!p_extra_data.empty())
