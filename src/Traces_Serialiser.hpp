@@ -534,6 +534,22 @@ private:
             m_output_file << std::to_integer<std::uint8_t>(sample);
         }
     }
+    //! @todo: Document
+    static decltype(m_traces)
+    split_into_traces(const std::vector<T_Sample>& p_traces,
+                      const std::uint32_t p_samples_per_trace)
+    {
+        decltype(m_traces) chunked;
+
+        for (auto it = std::begin(p_traces); std::end(p_traces) != it; ++it)
+        {
+            const auto last = it + p_samples_per_trace;
+
+            chunked.emplace_back(std::vector<T_Sample>(it, last));
+        }
+
+        return chunked;
+    }
 
 public:
     // These variables are intended to improve readability and nothing more.
@@ -602,27 +618,6 @@ public:
     {
         // TODO: Add more validation to sample length. x8 cannot be longer
         // than sizeof(T_Sample)
-    }
-
-    //! @brief Constructs the Serialiser object and adds all of the
-    //! mandatory data. This constructor requires the number of traces to be
-    //! set as a parameter. Optional headers can be set later. All traces
-    //! are required to be passed to the constructor as well.
-    //! @todo: Document
-    static decltype(m_traces)
-    split_into_traces(const std::vector<T_Sample>& p_traces,
-                      const std::uint32_t p_samples_per_trace)
-    {
-        decltype(m_traces) chunked;
-
-        for (auto it = std::begin(p_traces); std::end(p_traces) != it; ++it)
-        {
-            const auto last = it + p_samples_per_trace;
-
-            chunked.emplace_back(std::vector<T_Sample>(it, last));
-        }
-
-        return chunked;
     }
 
     //! @param p_number_of_traces The number of traces to be saved.
