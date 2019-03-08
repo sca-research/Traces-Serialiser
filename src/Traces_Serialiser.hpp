@@ -86,8 +86,8 @@ private:
         m_headers;
 
     //! @todo Document
-    std::uint32_t m_number_of_traces;
-    const std::uint32_t m_samples_per_trace;
+    std::uint64_t m_number_of_traces;  //!@todo Does this need to be stored?
+    const std::uint64_t m_samples_per_trace;
     const std::uint8_t m_sample_length;
 
     std::vector<std::string> m_extra_data;
@@ -424,33 +424,11 @@ private:
                Tag_External_Clock_Time_Base >= p_tag;
     }
 
-    //! @brief Statically casts the value given by p_input to the type given by
-    //! T_cast_output whilst ensuring no loss of precision.
-    //! @exception std::range_error If the result of the cast has suffered a
-    //! loss of precision then an exception is thrown.
-    //! @param p_input The value to be cast.
-    //! @tparam T_cast_input The type of the original data.
-    //! @tparam T_cast_output The type to be cast to.
-    //! @returns The cast value.
-    // TODO: This could be replaced with boost numeric cast
-    // TODO: ... or later moved to a separate file.
-    template <typename T_cast_output, typename T_cast_input>
-    constexpr static T_cast_output safe_cast(T_cast_input p_input)
-    {
-        const auto output = static_cast<T_cast_output>(p_input);
-        if (p_input != output)
-        {
-            throw std::range_error("Casting error. Loss of precision detected. "
-                                   "This may lead to inaccurate results.");
-        }
-        return output;
-    }
-
     //! @todo: document
     void save_headers(std::ofstream& m_output_file) const
     {
-        // TODO: If all of the samples are smaller than the sample length then
-        // the sample length can be reduced, saving a lot of file size.
+        // TODO: If all of the samples are smaller than the sample length
+        // then the sample length can be reduced, saving a lot of file size.
 
         // Output each header
         // // TODO: Split this into multiple functions
@@ -660,8 +638,7 @@ public:
     Serialiser(const std::vector<T_Sample>& p_traces,
                const std::uint32_t p_number_of_traces)
         : m_headers(), m_number_of_traces(p_number_of_traces),
-          m_samples_per_trace(
-              safe_cast<std::uint32_t>(p_traces.size() / p_number_of_traces)),
+          m_samples_per_trace{p_traces.size() / p_number_of_traces},
           m_sample_length(sizeof(T_Sample)), m_extra_data{},
           m_traces(split_into_traces(p_traces, m_samples_per_trace))
     {
@@ -682,14 +659,12 @@ public:
     // trace.
     Serialiser(const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers(),
-          m_number_of_traces(safe_cast<std::uint32_t>(p_traces.size())),
+        : m_headers(), m_number_of_traces{p_traces.size()},
           // Number of samples per trace can be assumed to be the length of
           // one trace.
           // TODO: This doesn't work if there is extra cryptographic data in
           // p_traces.
-          m_samples_per_trace(
-              safe_cast<std::uint32_t>(p_traces.front().size())),
+          m_samples_per_trace{p_traces.front().size()},
           m_sample_length(p_sample_length), m_extra_data{}, m_traces(p_traces)
     {
         validate_traces_length(m_traces);
@@ -699,12 +674,10 @@ public:
     Serialiser(const std::vector<std::string>& p_extra_data,
                const std::vector<std::vector<T_Sample>>& p_traces,
                const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers(),
-          m_number_of_traces(safe_cast<std::uint32_t>(p_traces.size())),
+        : m_headers(), m_number_of_traces{p_traces.size()},
           // Number of samples per trace can be assumed to be the length of
           // one trace.
-          m_samples_per_trace(
-              safe_cast<std::uint32_t>(p_traces.front().size())),
+          m_samples_per_trace{p_traces.front().size()},
           m_sample_length(p_sample_length), m_extra_data{p_extra_data},
           m_traces(p_traces)
     {
