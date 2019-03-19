@@ -118,7 +118,7 @@ TEST_CASE("Adding traces extra"
     SECTION("Adding 1 trace to blank traces")
     {
         // Create some traces and serialise them to a trs file.
-        Traces_Serialiser::Serialiser<std::uint8_t> serialiser{{{}}};
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser{};
         REQUIRE_NOTHROW(serialiser.Add_Trace({1, 2, 3}));
         serialiser.Save(file_path);
 
@@ -149,7 +149,7 @@ TEST_CASE("Adding traces extra"
     SECTION("Adding multiple traces to blank traces")
     {
         // Create some traces and serialise them to a trs file.
-        Traces_Serialiser::Serialiser<std::uint8_t> serialiser{{{}}};
+        Traces_Serialiser::Serialiser<std::uint8_t> serialiser{};
         REQUIRE_NOTHROW(serialiser.Add_Trace({1, 2, 3}));
         REQUIRE_NOTHROW(serialiser.Add_Trace({4, 5, 6}));
         serialiser.Save(file_path);
