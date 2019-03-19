@@ -35,31 +35,33 @@ TEST_CASE("Adding traces"
 {
     SECTION("Basic constructor")
     {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
-            {0, 1, 2, 3, 4}, 1, 5, 1));
+        REQUIRE_NOTHROW(
+            Traces_Serialiser::Serialiser<std::uint8_t>({{0, 1, 2, 3, 4}}));
     }
 
-    SECTION("2 bytes trace size")
-    {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
-            {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
-             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
-            1,
-            24,
-            0x02));
-    }
+    /*
+     *SECTION("2 bytes trace size")
+     *{
+     *    REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+     *        {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+     *         12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
+     *        1,
+     *        24,
+     *        0x02));
+     *}
+     */
 
     SECTION("32 bit traces")
     {
         REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint32_t>(
-            {0, 1000, 299999999, 312789, 498210113}, 1, 5, 4));
+            {{0, 1000, 299999999, 312789, 498210113}}));
     }
 
     // TODO: Test if float traces are actually saved correctly.
     SECTION("Float traces")
     {
         REQUIRE_NOTHROW(
-            Traces_Serialiser::Serialiser<float>({0.22548f, 0.001f}, 1, 2, 4));
+            Traces_Serialiser::Serialiser<float>({{0.22548f, 0.001f}}));
     }
 
     // TODO: Work out how to add this test. The expected result is that
@@ -72,17 +74,21 @@ TEST_CASE("Adding traces"
      *}
      */
 
-    SECTION("Constructor without sample length")
-    {
-        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
-            {0, 1, 2, 3, 4, 5}, 2, 3));
-    }
-
-    SECTION("Constructor without sample length and number of samples per trace")
-    {
-        REQUIRE_NOTHROW(
-            Traces_Serialiser::Serialiser<std::uint8_t>({0, 1, 2, 3, 4, 5}, 2));
-    }
+    /*
+     *    SECTION("Constructor without sample length")
+     *    {
+     *        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+     *            {0, 1, 2, 3, 4, 5}, 2, 3));
+     *    }
+     *
+     *    SECTION("Constructor without sample length and number of samples per
+     * trace")
+     *    {
+     *        REQUIRE_NOTHROW(
+     *            Traces_Serialiser::Serialiser<std::uint8_t>({0, 1, 2, 3, 4,
+     * 5}, 2));
+     *    }
+     */
 
     SECTION("2D Constructor")
     {
@@ -94,6 +100,12 @@ TEST_CASE("Adding traces"
     {
         REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
             {"Hello", "World"}, {{0, 1, 2}, {3, 4, 5}}));
+    }
+
+    SECTION("2D Constructor with decimal extra data")
+    {
+        REQUIRE_NOTHROW(Traces_Serialiser::Serialiser<std::uint8_t>(
+            {"678", "9"}, {{0, 1, 2}, {3, 4, 5}}));
     }
 
     SECTION("2D Constructor with hex extra data")
