@@ -86,8 +86,13 @@ private:
         m_headers;
 
     //! @todo Document
-    std::uint64_t m_number_of_traces;  //!@todo Does this need to be stored?
-    std::uint64_t m_samples_per_trace;
+    std::uint64_t
+        m_number_of_traces;  //!@todo Does this need to be stored? - no -
+                             //! m_traces.size() - Maybe use a macro instead ?
+    std::uint64_t
+        m_samples_per_trace;  //!@todo Does this need to be stored? - no -
+                              //! m_traces.size() - Maybe use a macro
+                              //! instead?
     const std::uint8_t m_sample_length;
 
     std::vector<std::string> m_extra_data;
@@ -289,18 +294,17 @@ private:
             m_traces.size() * m_traces.front().size())
         {
             throw std::domain_error(
-                "Invalid parameters given. Either the number of traces, "
-                "number of samples per trace or the sample length is "
-                "incorrect.");
+                "Invalid parameters given. Either the number of traces, number "
+                "of samples per trace or the sample length is incorrect.");
         }
     }
 
     //! @brief Checks if each of the traces within p_traces are of the same
-    //! length. This does not return anything as an exception will be thrown if
-    //! the validation fails.
+    //! length. This does not return anything as an exception will be thrown
+    //! if the validation fails.
     //! @param p_traces The traces to be checked
-    //! @exception std::domain_error If the traces do not all contain the same
-    //! amount of samples then this exception is thrown.
+    //! @exception std::domain_error If the traces do not all contain the
+    //! same amount of samples then this exception is thrown.
     template <typename T_Traces>
     static constexpr void
     validate_traces_length(const std::vector<T_Traces>& p_traces)
@@ -534,22 +538,6 @@ private:
             m_output_file << std::to_integer<std::uint8_t>(sample);
         }
     }
-    //! @todo: Document
-    static decltype(m_traces)
-    split_into_traces(const std::vector<T_Sample>& p_traces,
-                      const std::uint32_t p_samples_per_trace)
-    {
-        decltype(m_traces) chunked;
-
-        for (auto it = std::begin(p_traces); std::end(p_traces) != it; ++it)
-        {
-            const auto last = it + p_samples_per_trace;
-
-            chunked.emplace_back(std::vector<T_Sample>(it, last));
-        }
-
-        return chunked;
-    }
 
 public:
     // These variables are intended to improve readability and nothing more.
@@ -590,51 +578,6 @@ public:
     constexpr static std::uint8_t Tag_External_Clock_Frequency         {0x66};
     constexpr static std::uint8_t Tag_External_Clock_Time_Base         {0x67};
     // clang-format on
-
-    //! @brief Constructs the Serialiser object and adds all of the
-    //! mandatory data. This constructor requires the number of traces and
-    //! number of samples per trace to be set as parameters. The mandatory
-    //! sample coding header is calculated from the length of one sample.
-    //! Optional headers can be set later. All traces are required to be
-    //! passed to the constructor as well.
-    //! @param p_number_of_traces The number of traces to be saved.
-    //! @param p_samples_per_trace The number of samples in each individual
-    //! trace.
-    //! @param p_traces All of the traces as stored as a vector of samples.
-    //! @param p_sample_length The length of a trace sample in bytes. This
-    //! can optionally be specified. If not specified then it is assumed to
-    //! be the size of the data type samples are stored as, given by
-    //! T_Sample.
-    // TODO: Add support for cryptographic data to be included in each
-    // trace.
-    Serialiser(const std::vector<T_Sample>& p_traces,
-               const std::uint32_t p_number_of_traces,
-               const std::uint32_t p_samples_per_trace,
-               const std::uint8_t p_sample_length = sizeof(T_Sample))
-        : m_headers{}, m_number_of_traces{p_number_of_traces},
-          m_samples_per_trace{p_samples_per_trace},
-          m_sample_length{p_sample_length}, m_extra_data{},
-          m_traces{split_into_traces(p_traces, m_samples_per_trace)}
-    {
-        // TODO: Add more validation to sample length. x8 cannot be longer
-        // than sizeof(T_Sample)
-    }
-
-    //! @param p_number_of_traces The number of traces to be saved.
-    //! @param p_traces All of the traces as stored as a vector of samples.
-    //! @note The length of one sample is not specified, it is assumed to be
-    //! the size of the data type samples are stored as.
-    //! @note The number of samples per trace is not specified. It is
-    //! assumed to be the length of one trace divided by the length of one
-    //! sample.
-    // TODO: Add support for cryptographic data to be included in each
-    // trace.
-    Serialiser(const std::vector<T_Sample>& p_traces,
-               const std::uint32_t p_number_of_traces)
-        : Serialiser{
-              split_into_traces(p_traces, p_traces.size() / p_number_of_traces)}
-    {
-    }
 
     //! @brief Constructs the Serialiser object and adds all of the
     //! mandatory data. Optional headers can be set later. All traces are
