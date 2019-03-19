@@ -95,6 +95,8 @@ private:
                               //! instead?
     const std::uint8_t m_sample_length;
 
+    std::size_t m_longest_trace_length;
+
     std::vector<std::string> m_extra_data;
 
     //! This contains the actual side channel analysis traces, stored as
@@ -160,25 +162,91 @@ private:
         return bytes_vector;
     }
 
-    //! @brief This function is intended to ensure that each trace is of the
-    //! correct length as defined by p_sample_length by padding it with 0s. If
-    //! the length of the data is already greater than or equal to
+    //! @brief This function is intended to ensure that each item in p_data
+    //! correct length as defined by p_sample_length by padding it with 0s.
+    //! This function will prepend 0s onto the front of p_data.
+    //! If the length of the data is already greater than or equal to
     //! p_sample_length, no action will be taken. This may result in implicit
-    //! shortening of the value but most modern compiliers will pick this up.
+    //! shortening of the value but most modern compilers will pick this up.
+    //! @tparam T The type of the data to the padded. The type stored in p_data.
+    //! This will work with any type where T{0} will successfully construct.
     //! @param p_data The data to be padded to the correct length as a
     //! vector of bytes.
     //! @param p_length The length the data will be padded to.
     //! @return Returns a copy of the original data vector, padded with 0s to
     //! the length given by p_sample_length.
-    static const std::vector<std::byte>
-    // TODO: why is p_data not const & or pointer at least?
-    pad(std::vector<std::byte> p_data, const std::uint8_t p_length)
+    //! @todo Pass p_data by pointer
+    template <typename T>
+    static const std::vector<T> pad_front(std::vector<T> p_data,
+                                          const std::uint8_t p_length)
     {
         while (p_data.size() < p_length)
         {
-            p_data.insert(p_data.begin(), std::byte{0});
+            p_data.insert(std::begin(p_data), T{0});
         }
         return p_data;
+    }
+
+    //! @brief This function is intended to ensure that each item in p_data
+    //! correct length as defined by p_sample_length by padding it with 0s.
+    //! This function will append 0s onto the end of p_data.
+    //! If the length of the data is already greater than or equal to
+    //! p_sample_length, no action will be taken. This may result in implicit
+    //! shortening of the value but most modern compilers will pick this up.
+    //! @tparam T The type of the data to the padded. The type stored in p_data.
+    //! This will work with any type where T{0} will successfully construct.
+    //! @param p_data The data to be padded to the correct length as a
+    //! vector of bytes.
+    //! @param p_length The length the data will be padded to.
+    //! @return Returns a copy of the original data vector, padded with 0s to
+    //! the length given by p_sample_length.
+    //! @todo Pass p_data by pointer
+    template <typename T>
+    static const std::vector<T> pad_back(std::vector<T> p_data,
+                                         const std::uint8_t p_length)
+    {
+        while (p_data.size() < p_length)
+        {
+            p_data.push_back(T{0});
+        }
+        return p_data;
+    }
+
+    //! @brief Retrieves the length of the longest element in p_data.
+    //! @param p_data The contain from which the length of the longest element
+    //! will be found.
+    //! @tparam T The type of the data to the padded. The type stored in p_data.
+    //! This will work with any type where the operator < is defined.
+    //! @returns The size of the largest element in p_data
+    template <typename T> static std::size_t get_longest(const T& p_data)
+    {
+        return (*std::max_element(
+                    std::begin(p_data),
+                    std::end(p_data),
+                    [](const auto& p_first, const auto& p_second) {
+                        return p_first.size() < p_second.size();
+                    }))
+            .size();
+    }
+
+    //! @brief Pads all of the data in m_traces to ensure each trace is of the
+    //! same length using pad_back().
+    //! This is necessary as TRS files require all traces to be of the same
+    //! length.
+    void pad_all_traces()
+    {
+        // If the longest trace length is not yet recorded, so calculate it.
+        if (0 == m_longest_trace_length)
+        {
+            m_longest_trace_length = get_longest(m_traces);
+        }
+        for (auto& trace : m_traces)
+        {
+            trace = pad_back(trace, m_longest_trace_length);
+        }
+
+        // This may have changed during padding.
+        m_samples_per_trace = m_traces.front().size();
     }
 
     //! @brief Converts a vector of data given by the parameter p_data into a
@@ -208,13 +276,12 @@ private:
                                             std::vector<T_Sample>>::value)
                 {
                     // Check that each sub container is of the same length
-                    validate_traces_length(p_data);
 
                     return convert_traces_to_bytes(data, p_sample_length);
                 }
                 // if this is not a nested container simply convert
                 // each of the values.
-                return pad(convert_to_bytes(data), p_sample_length);
+                return pad_front(convert_to_bytes(data), p_sample_length);
             }()};
 
             // Append the converted values onto the end of bytes_vector
@@ -299,29 +366,12 @@ private:
         }
     }
 
-    //! @brief Checks if each of the traces within p_traces are of the same
-    //! length. This does not return anything as an exception will be thrown
-    //! if the validation fails.
-    //! @param p_traces The traces to be checked
-    //! @exception std::domain_error If the traces do not all contain the
-    //! same amount of samples then this exception is thrown.
-    template <typename T_Traces>
-    static constexpr void
-    validate_traces_length(const std::vector<T_Traces>& p_traces)
-    {
-        if (!check_all_same_length(p_traces))
-        {
-            throw std::domain_error("Traces must all contain the same "
-                                    "number of samples in a TRS file.");
-        }
-    }
-
-    //! @brief Checks if all of the extra data within p_extra_data of the same
-    //! length. This does not return anything as an exception will be thrown if
-    //! the validation fails.
+    //! @brief Checks if all of the extra data within p_extra_data of the
+    //! same length. This does not return anything as an exception will be
+    //! thrown if the validation fails.
     //! @param p_extra_data The data to be checked
-    //! @exception std::domain_error If they are not all the same length then
-    //! this exception is thrown.
+    //! @exception std::domain_error If they are not all the same length
+    //! then this exception is thrown.
     template <typename T_Traces>
     static constexpr void
     validate_extra_data_length(const std::vector<T_Traces>& p_extra_data)
@@ -608,7 +658,9 @@ public:
           // one trace.
           m_samples_per_trace{p_traces.front().size()},
           m_sample_length{p_sample_length},
-          m_extra_data{p_extra_data}, m_traces{p_traces}
+          // Set longest trace length to 0 for now. It will be changed later
+          m_longest_trace_length{0}, m_extra_data{p_extra_data}, m_traces{
+                                                                     p_traces}
     {
     }
 
@@ -714,6 +766,9 @@ public:
                                          "the file to be written to");
         }
 
+        // TRS files require all traces to be of the same length.
+        pad_all_traces();
+
         bool is_digits{false};
 
         // Set this header to match the data that is stored.
@@ -739,7 +794,6 @@ public:
 
         // Ensure information stored will create a valid trs file.
         //! @todo Group all THREE validation functions in a valid function.
-        validate_traces_length(m_traces);
         validate_extra_data_length(m_extra_data);
 
         // This has to be done after changing the length of cryptographic

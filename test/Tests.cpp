@@ -56,5 +56,6 @@ const std::string load_file(const std::string& p_file_path)
 // The actual tests
 #include "Test_Adding_Traces.hpp"
 #include "Test_Constructors.hpp"
+#include "Test_Different_Length_Traces.hpp"
 #include "Test_Traces_Serialiser.hpp"
 #include "Test_Traces_Types.hpp"
