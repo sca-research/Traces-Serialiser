@@ -203,7 +203,7 @@ private:
     //! @todo Pass p_data by pointer
     template <typename T>
     static const std::vector<T> pad_back(std::vector<T> p_data,
-                                         const std::uint8_t p_length)
+                                         const std::size_t p_length)
     {
         while (p_data.size() < p_length)
         {
