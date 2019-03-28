@@ -207,7 +207,7 @@ private:
     {
         while (p_data.size() < p_length)
         {
-            p_data.push_back(T{0});
+            p_data.emplace_back(0);
         }
         return p_data;
     }
