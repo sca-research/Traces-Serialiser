@@ -55,18 +55,16 @@ if(${PROJECT_NAME}_CALCULATE_COVERAGE)
             DEPENDS tests
             COMMENT "Generating HTML coverage report"
     )
-endif(${PROJECT_NAME}_CALCULATE_COVERAGE)
+endif()
 
 # Make test executable
 add_executable(${PROJECT_NAME}_tests
     Tests.cpp)
 
-# Include the src being tested
-target_include_directories(${PROJECT_NAME}_tests PRIVATE ${PROJECT_SOURCE_DIR}/src
-    ${EXECUTABLE_OUTPUT_PATH})
-
 target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
-target_include_directories(${PROJECT_NAME}_tests SYSTEM PRIVATE ${THIRD_PARTY_DIR})
+target_include_directories(${PROJECT_NAME}_tests SYSTEM PRIVATE
+    ${THIRD_PARTY_DIR}
+)
 
 enable_testing()
 add_test(NAME Run_Tests COMMAND tests)
